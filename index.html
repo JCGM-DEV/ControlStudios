@@ -1,0 +1,2633 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ControlStudios - DAW 2º Command Center (Cloud Sync)</title>
+    <style>
+        :root {
+            --bg-main: #0b1120;
+            --bg-card: #151f32;
+            --bg-card-hover: #1e2c45;
+            --bg-glass: rgba(21, 31, 50, 0.75);
+            --border: #24344d;
+            --border-light: #334869;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --text-dim: #64748b;
+            --accent: #38bdf8;
+            --accent-glow: rgba(56, 189, 248, 0.2);
+            --accent-gradient: linear-gradient(135deg, #38bdf8 0%, #0284c7 100%);
+            --success: #10b981;
+            --success-glow: rgba(16, 185, 129, 0.2);
+            --warning: #f59e0b;
+            --warning-glow: rgba(245, 158, 11, 0.2);
+            --danger: #ef4444;
+            --danger-glow: rgba(239, 68, 68, 0.2);
+            --purple: #a855f7;
+            --purple-glow: rgba(168, 85, 247, 0.2);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            line-height: 1.5;
+            padding-bottom: 60px;
+            overflow-x: hidden;
+        }
+
+        /* HEADER */
+        header {
+            background: rgba(11, 17, 32, 0.95);
+            border-bottom: 1px solid var(--border);
+            padding: 1.25rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(12px);
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1.2rem;
+            max-width: 1440px;
+            margin: 0 auto;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
+        }
+
+        .brand-badge {
+            background: var(--accent-gradient);
+            color: #020617;
+            font-weight: 800;
+            font-size: 0.85rem;
+            padding: 0.35rem 0.75rem;
+            border-radius: 8px;
+            box-shadow: 0 0 15px var(--accent-glow);
+            letter-spacing: 0.5px;
+        }
+
+        .brand h1 {
+            font-size: 1.4rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .global-progress-container {
+            flex: 1;
+            min-width: 260px;
+            max-width: 420px;
+            background: rgba(15, 23, 42, 0.6);
+            padding: 0.65rem 1rem;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+        }
+
+        .progress-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.82rem;
+            margin-bottom: 0.4rem;
+            color: var(--text-muted);
+        }
+
+        .progress-labels strong {
+            color: var(--accent);
+            font-weight: 700;
+        }
+
+        .progress-bar-bg {
+            background: #1e293b;
+            height: 8px;
+            border-radius: 999px;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            background: var(--accent-gradient);
+            height: 100%;
+            width: 0%;
+            border-radius: 999px;
+            transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 0 10px var(--accent-glow);
+        }
+
+        .actions-bar {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            background: var(--bg-card);
+            color: var(--text-main);
+            border: 1px solid var(--border);
+            padding: 0.5rem 0.9rem;
+            border-radius: 8px;
+            font-size: 0.83rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            text-decoration: none;
+        }
+
+        .btn:hover {
+            background: var(--bg-card-hover);
+            border-color: var(--accent);
+            color: var(--accent);
+            transform: translateY(-1px);
+        }
+
+        .btn-primary {
+            background: var(--accent-gradient);
+            color: #020617;
+            border: none;
+            font-weight: 700;
+            box-shadow: 0 0 15px var(--accent-glow);
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #7dd3fc 0%, #0369a1 100%);
+            color: #020617;
+            transform: translateY(-1px);
+            box-shadow: 0 0 20px rgba(56, 189, 248, 0.4);
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            color: #020617;
+            border: none;
+            font-weight: 700;
+        }
+
+        /* LIVE STATUS COCKPIT */
+        .live-cockpit {
+            background: linear-gradient(90deg, rgba(16, 185, 129, 0.1) 0%, rgba(56, 189, 248, 0.08) 50%, rgba(168, 85, 247, 0.08) 100%);
+            border-bottom: 1px solid rgba(56, 189, 248, 0.2);
+            padding: 0.75rem 2rem;
+            position: sticky;
+            top: 73px;
+            z-index: 95;
+            backdrop-filter: blur(10px);
+        }
+
+        .live-cockpit-inner {
+            max-width: 1440px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .live-status-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .live-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.35rem 0.75rem;
+            border-radius: 999px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .live-badge.active {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.4);
+        }
+
+        .live-badge.idle {
+            background: rgba(16, 185, 129, 0.15);
+            color: #10b981;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .pulse-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: currentColor;
+            box-shadow: 0 0 8px currentColor;
+            animation: pulse-dot 1.4s infinite ease-in-out;
+        }
+
+        @keyframes pulse-dot {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.4); opacity: 0.5; }
+        }
+
+        .live-info-box {
+            display: flex;
+            flex-direction: column;
+            gap: 0.1rem;
+        }
+
+        .live-title {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .live-sub {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+        }
+
+        .live-countdown {
+            font-family: monospace;
+            font-weight: 700;
+            color: var(--accent);
+            background: rgba(56, 189, 248, 0.12);
+            padding: 0.15rem 0.45rem;
+            border-radius: 5px;
+            border: 1px solid rgba(56, 189, 248, 0.25);
+        }
+
+        .live-status-right {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        .digital-clock {
+            font-family: monospace;
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--accent);
+            background: rgba(2, 6, 23, 0.6);
+            padding: 0.35rem 0.75rem;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .sim-picker {
+            background: rgba(2, 6, 23, 0.7);
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            padding: 0.35rem 0.65rem;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            outline: none;
+        }
+
+        .sim-picker:focus {
+            border-color: var(--accent);
+        }
+
+        /* CONTAINER */
+        .container {
+            max-width: 1440px;
+            margin: 1.5rem auto;
+            padding: 0 2rem;
+        }
+
+        /* KPI GRID */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.2rem;
+            margin-bottom: 2rem;
+        }
+
+        .kpi-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 1.25rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.25s ease;
+        }
+
+        .kpi-card:hover {
+            transform: translateY(-2px);
+            border-color: var(--border-light);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+        }
+
+        .kpi-card.highlight {
+            border-color: rgba(56, 189, 248, 0.5);
+            background: linear-gradient(135deg, var(--bg-card) 0%, rgba(56, 189, 248, 0.08) 100%);
+        }
+
+        .kpi-card.urgent {
+            border-color: rgba(245, 158, 11, 0.5);
+            background: linear-gradient(135deg, var(--bg-card) 0%, rgba(245, 158, 11, 0.08) 100%);
+        }
+
+        .kpi-card.purple {
+            border-color: rgba(168, 85, 247, 0.5);
+            background: linear-gradient(135deg, var(--bg-card) 0%, rgba(168, 85, 247, 0.08) 100%);
+        }
+
+        .kpi-title {
+            font-size: 0.78rem;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            color: var(--text-muted);
+            margin-bottom: 0.4rem;
+            font-weight: 600;
+        }
+
+        .kpi-value {
+            font-size: 1.45rem;
+            font-weight: 800;
+            color: var(--text-main);
+            letter-spacing: -0.5px;
+        }
+
+        .kpi-sub {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 0.4rem;
+        }
+
+        /* CONTROLS ROW */
+        .controls-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 1rem;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .tab-btn {
+            background: transparent;
+            color: var(--text-muted);
+            border: 1px solid transparent;
+            padding: 0.65rem 1.15rem;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.88rem;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+        }
+
+        .tab-btn:hover {
+            background: rgba(255, 255, 255, 0.04);
+            color: var(--text-main);
+        }
+
+        .tab-btn.active {
+            background: var(--accent-glow);
+            color: var(--accent);
+            border: 1px solid rgba(56, 189, 248, 0.35);
+            box-shadow: 0 0 15px var(--accent-glow);
+        }
+
+        .filters {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        select, input[type="search"] {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            padding: 0.6rem 0.9rem;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        select:focus, input[type="search"]:focus {
+            border-color: var(--accent);
+        }
+
+        /* VIEWS */
+        .view-section {
+            display: none;
+            animation: fadeIn 0.25s ease-in-out;
+        }
+
+        .view-section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* SUBJECTS GRID */
+        .subjects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(430px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .subject-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 1.35rem;
+            display: flex;
+            flex-direction: column;
+            transition: all 0.25s ease;
+        }
+
+        .subject-card:hover {
+            border-color: var(--border-light);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+        }
+
+        .subject-header {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+            padding-bottom: 0.85rem;
+            margin-bottom: 0.85rem;
+        }
+
+        .subject-title-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            gap: 0.5rem;
+            margin-bottom: 0.35rem;
+        }
+
+        .subject-code {
+            font-family: monospace;
+            background: rgba(56, 189, 248, 0.12);
+            color: var(--accent);
+            padding: 0.15rem 0.45rem;
+            border-radius: 5px;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+
+        .subject-name {
+            font-weight: 700;
+            font-size: 1.05rem;
+            flex: 1;
+        }
+
+        .subject-pct {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--accent);
+        }
+
+        .mini-progress {
+            background: rgba(2, 6, 23, 0.6);
+            height: 5px;
+            border-radius: 999px;
+            overflow: hidden;
+            margin-top: 0.5rem;
+        }
+
+        .mini-progress-fill {
+            background: var(--accent-gradient);
+            height: 100%;
+            border-radius: 999px;
+            transition: width 0.3s;
+        }
+
+        /* TASKS */
+        .task-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 0.45rem;
+            flex: 1;
+        }
+
+        .task-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            padding: 0.6rem 0.75rem;
+            border-radius: 8px;
+            background: rgba(2, 6, 23, 0.35);
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            transition: all 0.18s ease;
+            cursor: pointer;
+        }
+
+        .task-item:hover {
+            background: rgba(56, 189, 248, 0.06);
+            border-color: rgba(56, 189, 248, 0.2);
+        }
+
+        .task-item.done {
+            opacity: 0.55;
+            background: rgba(16, 185, 129, 0.05);
+            border-color: rgba(16, 185, 129, 0.15);
+        }
+
+        .task-item.done .task-title {
+            text-decoration: line-through;
+            color: var(--text-dim);
+        }
+
+        .task-checkbox {
+            margin-top: 0.2rem;
+            cursor: pointer;
+            accent-color: var(--accent);
+            width: 17px;
+            height: 17px;
+        }
+
+        .task-info {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .task-title {
+            font-size: 0.88rem;
+            font-weight: 500;
+        }
+
+        .task-meta {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.74rem;
+            color: var(--text-muted);
+            flex-wrap: wrap;
+        }
+
+        .badge {
+            padding: 0.15rem 0.45rem;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .badge-test { background: rgba(56, 189, 248, 0.15); color: var(--accent); }
+        .badge-work { background: rgba(245, 158, 11, 0.15); color: var(--warning); }
+        .badge-tfc { background: rgba(168, 85, 247, 0.18); color: var(--purple); }
+        .badge-plan { background: rgba(16, 185, 129, 0.15); color: var(--success); }
+
+        /* TIMELINE TABLE */
+        .timeline-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            background: var(--bg-card);
+            border-radius: 14px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+
+        .timeline-table th, .timeline-table td {
+            padding: 0.85rem 1.1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .timeline-table th {
+            background: rgba(2, 6, 23, 0.6);
+            color: var(--text-muted);
+            font-size: 0.76rem;
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        .timeline-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .timeline-table tr:hover td {
+            background: rgba(56, 189, 248, 0.04);
+        }
+
+        /* SCHEDULE GRID */
+        .schedule-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 1.2rem;
+        }
+
+        .day-column {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 1.1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            transition: all 0.25s ease;
+        }
+
+        .day-column.today {
+            border-color: var(--accent);
+            box-shadow: 0 0 20px rgba(56, 189, 248, 0.15);
+            background: linear-gradient(180deg, rgba(56, 189, 248, 0.06) 0%, var(--bg-card) 100%);
+        }
+
+        .day-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 800;
+            font-size: 1.05rem;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 0.65rem;
+        }
+
+        .slot {
+            background: rgba(2, 6, 23, 0.45);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            padding: 0.65rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.2rem;
+            position: relative;
+            transition: all 0.2s ease;
+        }
+
+        .slot.active-now {
+            border-color: #38bdf8;
+            background: rgba(56, 189, 248, 0.15);
+            box-shadow: 0 0 15px rgba(56, 189, 248, 0.3);
+            animation: pulse-border 2s infinite;
+        }
+
+        @keyframes pulse-border {
+            0%, 100% { border-color: #38bdf8; box-shadow: 0 0 12px rgba(56, 189, 248, 0.3); }
+            50% { border-color: #7dd3fc; box-shadow: 0 0 20px rgba(56, 189, 248, 0.6); }
+        }
+
+        .slot-time {
+            font-size: 0.72rem;
+            color: var(--accent);
+            font-weight: 700;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .slot-name {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        .slot-tip {
+            font-size: 0.74rem;
+            color: var(--text-muted);
+            margin-top: 0.15rem;
+        }
+
+        .slot.fct {
+            border-color: rgba(16, 185, 129, 0.3);
+            background: rgba(16, 185, 129, 0.06);
+        }
+
+        .slot.fct .slot-time {
+            color: var(--success);
+        }
+
+        .slot.afternoon {
+            border-color: rgba(168, 85, 247, 0.3);
+            background: rgba(168, 85, 247, 0.06);
+        }
+
+        .slot.afternoon .slot-time {
+            color: var(--purple);
+        }
+
+        /* MODALS */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(2, 6, 23, 0.85);
+            backdrop-filter: blur(8px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 1.5rem;
+            animation: fadeIn 0.2s ease-out;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--bg-card);
+            border: 1px solid var(--border-light);
+            border-radius: 18px;
+            width: 100%;
+            max-width: 680px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6), 0 0 35px var(--accent-glow);
+            position: relative;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 1rem;
+        }
+
+        .modal-title-box h2 {
+            font-size: 1.35rem;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .modal-close {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            font-size: 1.4rem;
+            cursor: pointer;
+            padding: 0.2rem 0.5rem;
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+
+        .modal-close:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-main);
+        }
+
+        .briefing-card {
+            background: rgba(2, 6, 23, 0.5);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1rem 1.25rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .briefing-card.hero {
+            border-color: rgba(56, 189, 248, 0.4);
+            background: linear-gradient(135deg, rgba(2, 6, 23, 0.8) 0%, rgba(56, 189, 248, 0.1) 100%);
+        }
+
+        .briefing-badge {
+            align-self: flex-start;
+            background: var(--accent-gradient);
+            color: #020617;
+            font-weight: 800;
+            font-size: 0.72rem;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+        }
+
+        .briefing-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .briefing-list-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.65rem;
+            font-size: 0.88rem;
+        }
+
+        /* FOCUS TIMER */
+        .timer-circle-container {
+            position: relative;
+            width: 200px;
+            height: 200px;
+            margin: 0 auto;
+        }
+
+        .timer-svg {
+            width: 100%;
+            height: 100%;
+            transform: rotate(-90deg);
+        }
+
+        .timer-circle-bg {
+            fill: none;
+            stroke: #1e293b;
+            stroke-width: 10;
+        }
+
+        .timer-circle-progress {
+            fill: none;
+            stroke: #38bdf8;
+            stroke-width: 10;
+            stroke-linecap: round;
+            stroke-dasharray: 565.48;
+            stroke-dashoffset: 0;
+            transition: stroke-dashoffset 1s linear;
+        }
+
+        .timer-display-inner {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+        }
+
+        .timer-time {
+            font-family: monospace;
+            font-size: 2.3rem;
+            font-weight: 800;
+            color: var(--text-main);
+        }
+
+        .timer-label {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+
+        /* TOASTS */
+        .toast-container {
+            position: fixed;
+            bottom: 25px;
+            right: 25px;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            z-index: 2000;
+            pointer-events: none;
+        }
+
+        .toast {
+            pointer-events: auto;
+            background: #1e293b;
+            color: var(--text-main);
+            border: 1px solid var(--accent);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 0 15px var(--accent-glow);
+            padding: 1rem 1.25rem;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
+            min-width: 300px;
+            max-width: 420px;
+            animation: slideInRight 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .toast.warning {
+            border-color: var(--warning);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 0 15px var(--warning-glow);
+        }
+
+        .toast.success {
+            border-color: var(--success);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 0 15px var(--success-glow);
+        }
+
+        @keyframes slideInRight {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 1100px) {
+            .schedule-grid { grid-template-columns: repeat(2, 1fr); }
+            .subjects-grid { grid-template-columns: 1fr; }
+        }
+
+        @media (max-width: 768px) {
+            header, .live-cockpit, .container { padding: 1rem; }
+            .schedule-grid { grid-template-columns: 1fr; }
+            .header-top { flex-direction: column; align-items: stretch; }
+            .live-cockpit-inner { flex-direction: column; align-items: flex-start; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+    <div class="header-top">
+        <div class="brand">
+            <span class="brand-badge">2º DAW</span>
+            <h1>Centro de Control & Estudio</h1>
+        </div>
+
+        <div class="global-progress-container">
+            <div class="progress-labels">
+                <span>Progreso Total del Curso</span>
+                <strong id="global-pct-text">0% (0/0)</strong>
+            </div>
+            <div class="progress-bar-bg">
+                <div class="progress-bar-fill" id="global-bar"></div>
+            </div>
+        </div>
+
+        <div class="actions-bar">
+            <button class="btn" id="btn-cloud-sync" onclick="openCloudModal()" style="border: 1px solid #38bdf8; color: #38bdf8; background: rgba(56, 189, 248, 0.1);" title="Sincronización en la nube con Firebase">
+                <span id="cloud-badge-dot" style="display:inline-block; width:8px; height:8px; border-radius:50%; background:#94a3b8; margin-right:4px;"></span>
+                <span id="cloud-btn-text">☁️ Sesión Nube</span>
+            </button>
+            <button class="btn btn-primary" onclick="openBriefingModal()" title="Ver qué me toca hoy y resumen por voz">📋 Mi Agenda Hoy</button>
+            <button class="btn" onclick="openFocusTimerModal()" title="Temporizador de concentración">⏱️ Focus Timer</button>
+            <button class="btn" onclick="openSettingsModal()" title="Configuración de alarmas y sonido">⚙️ Alarmas</button>
+            <button class="btn" onclick="exportProgress()" title="Exportar copia de seguridad en JSON">⬇ JSON</button>
+            <button class="btn" onclick="document.getElementById('import-file').click()" title="Cargar copia de seguridad">⬆ Importar</button>
+            <input type="file" id="import-file" style="display:none" accept=".json" onchange="importProgress(event)">
+            <button class="btn" onclick="resetProgress()" title="Restaurar estado inicial">↺ Reset</button>
+        </div>
+    </div>
+</header>
+
+<!-- LIVE STATUS COCKPIT (AVISOS EN DIRECTO NADA MÁS ABRIR) -->
+<div class="live-cockpit">
+    <div class="live-cockpit-inner">
+        <div class="live-status-left">
+            <div class="live-badge idle" id="live-badge">
+                <span class="pulse-dot"></span>
+                <span id="live-badge-text">VERIFICANDO HORARIO...</span>
+            </div>
+
+            <div class="live-info-box">
+                <div class="live-title" id="live-main-title">Calculando sesión actual...</div>
+                <div class="live-sub" id="live-sub-title">Cargando detalles...</div>
+            </div>
+        </div>
+
+        <div class="live-status-right">
+            <div class="digital-clock" id="digital-clock">00:00:00</div>
+
+            <!-- SIMULADOR MAQUINA DEL TIEMPO -->
+            <select class="sim-picker" id="sim-picker" onchange="handleSimulationChange(this.value)" title="Prueba cualquier hora y día para ver cómo reaccionan las alarmas">
+                <option value="real">⏱️ Hora Real (En Vivo)</option>
+                <option value="lun_0615">Simular: Lunes 06:15 (TFC)</option>
+                <option value="lun_0656">Simular: Lunes 06:56 (Aviso DWEC)</option>
+                <option value="mar_0630">Simular: Martes 06:30 (DWES 2h)</option>
+                <option value="mie_0715">Simular: Miércoles 07:15 (Python)</option>
+                <option value="jue_1830">Simular: Jueves 18:30 (Presencial DWES)</option>
+                <option value="vie_0700">Simular: Viernes 07:00 (Inglés / IPE)</option>
+                <option value="sab_1100">Simular: Sábado 11:00 (Finde)</option>
+            </select>
+
+            <button class="btn" onclick="AudioManager.playChime('warning'); showToast('🔔 Alarma de prueba activada', 'warning')" title="Probar sonido">🔔 Test Sonido</button>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <!-- KPIS -->
+    <div class="kpi-grid">
+        <div class="kpi-card highlight" onclick="openBriefingModal()" style="cursor: pointer;" title="Haz clic para abrir tu agenda completa">
+            <span class="kpi-title">🌅 Foco Matutino de Hoy (06:00 - 08:00)</span>
+            <div class="kpi-value" id="today-focus">Cargando...</div>
+            <span class="kpi-sub" id="today-Afternoon">Clases de tarde</span>
+        </div>
+        <div class="kpi-card urgent">
+            <span class="kpi-title">🎯 Hito Prioritario: Anteproyecto TFC</span>
+            <div class="kpi-value" id="tfc-countdown">-- días</div>
+            <span class="kpi-sub">Fecha límite: 30/11/2026 23:59 (Alcance 50h)</span>
+        </div>
+        <div class="kpi-card">
+            <span class="kpi-title">🛠️ Actividades Evaluables (Trabajos)</span>
+            <div class="kpi-value" id="works-counter">0 / 0</div>
+            <span class="kpi-sub">Obligatorios técnicos y transversales</span>
+        </div>
+        <div class="kpi-card purple">
+            <span class="kpi-title">📝 Tests de Unidades</span>
+            <div class="kpi-value" id="tests-counter">0 / 0</div>
+            <span class="kpi-sub">Cuestionarios de plataforma oficial</span>
+        </div>
+    </div>
+
+    <!-- CONTROLS & TABS -->
+    <div class="controls-row">
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('asignaturas', this)">📚 Asignaturas y Tareas</button>
+            <button class="tab-btn" onclick="switchTab('cronograma', this)">🎯 Cronograma de Trabajos</button>
+            <button class="tab-btn" onclick="switchTab('horario', this)">🗓️ Horario Semanal</button>
+            <button class="tab-btn" onclick="switchTab('focus', this)">⏱️ Modo Focus</button>
+        </div>
+
+        <div class="filters" id="task-filters">
+            <input type="search" id="search-input" placeholder="Buscar asignatura, unidad o hito..." oninput="renderSubjects()">
+            <select id="filter-status" onchange="renderSubjects()">
+                <option value="all">Todos los estados</option>
+                <option value="pending">⏳ Solo Pendientes</option>
+                <option value="done">✅ Solo Completados</option>
+            </select>
+            <select id="filter-type" onchange="renderSubjects()">
+                <option value="all">Todos los tipos</option>
+                <option value="work">🛠️ Trabajos Evaluables / TFC</option>
+                <option value="test">📝 Tests de Unidad</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- VIEW 1: ASIGNATURAS -->
+    <div id="view-asignaturas" class="view-section active">
+        <div class="subjects-grid" id="subjects-container"></div>
+    </div>
+
+    <!-- VIEW 2: CRONOGRAMA -->
+    <div id="view-cronograma" class="view-section">
+        <table class="timeline-table">
+            <thead>
+                <tr>
+                    <th style="width: 50px;">Estado</th>
+                    <th>Asignatura</th>
+                    <th>Actividad Evaluable / Hito</th>
+                    <th>Mes Recomendado</th>
+                    <th>Límite Oficial</th>
+                </tr>
+            </thead>
+            <tbody id="timeline-body"></tbody>
+        </table>
+    </div>
+
+    <!-- VIEW 3: HORARIO SEMANAL -->
+    <div id="view-horario" class="view-section">
+        <div class="schedule-grid" id="schedule-container"></div>
+    </div>
+
+    <!-- VIEW 4: MODO FOCUS EMBEBIDO -->
+    <div id="view-focus" class="view-section">
+        <div style="max-width: 600px; margin: 2rem auto; background: var(--bg-card); border: 1px solid var(--border); border-radius: 18px; padding: 2.5rem; text-align: center;">
+            <h2 style="margin-bottom: 0.5rem;">⏱️ Modo Concentración y Estudio</h2>
+            <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 2rem;">Bloque de alta concentración para mañanas y entregas</p>
+
+            <div class="timer-circle-container">
+                <svg class="timer-svg" viewBox="0 0 200 200">
+                    <circle class="timer-circle-bg" cx="100" cy="100" r="90"></circle>
+                    <circle class="timer-circle-progress" id="timer-progress-circle" cx="100" cy="100" r="90"></circle>
+                </svg>
+                <div class="timer-display-inner">
+                    <div class="timer-time" id="timer-display">25:00</div>
+                    <div class="timer-label" id="timer-target-label">Enfoque</div>
+                </div>
+            </div>
+
+            <div style="display: flex; justify-content: center; gap: 0.5rem; margin: 2rem 0 1.5rem; flex-wrap: wrap;">
+                <button class="btn" onclick="FocusTimer.setPreset(15)">⚡ 15 min</button>
+                <button class="btn" onclick="FocusTimer.setPreset(25)">🍅 25 min</button>
+                <button class="btn" onclick="FocusTimer.setPreset(50)">🎯 50 min</button>
+                <button class="btn" onclick="FocusTimer.setPreset(60)">📚 60 min</button>
+                <button class="btn btn-primary" onclick="FocusTimer.syncWithCurrentSlot()">⏰ Sincronizar con Sesión Actual</button>
+            </div>
+
+            <div style="display: flex; justify-content: center; gap: 1rem;">
+                <button class="btn btn-primary" id="timer-start-btn" onclick="FocusTimer.toggle()" style="padding: 0.75rem 1.8rem; font-size: 1rem;">▶ Iniciar</button>
+                <button class="btn" onclick="FocusTimer.reset()" style="padding: 0.75rem 1.4rem;">↺ Reiniciar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL: BRIEFING DIARIO AUTOMÁTICO AL ABRIR -->
+<div class="modal-overlay" id="briefing-modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <div class="modal-title-box">
+                <span class="briefing-badge" id="briefing-badge-day">HOY</span>
+                <h2 id="briefing-greeting" style="margin-top: 0.4rem;">¡Buenos días, José Carlos! 👋</h2>
+                <p id="briefing-date-str" style="color: var(--text-muted); font-size: 0.85rem; margin-top: 0.2rem;"></p>
+            </div>
+            <button class="modal-close" onclick="closeBriefingModal()">✕</button>
+        </div>
+
+        <!-- HERO SECTION -->
+        <div class="briefing-card hero">
+            <span style="font-size: 0.75rem; text-transform: uppercase; font-weight: 700; color: var(--accent); letter-spacing: 0.5px;">⚡ TU PLAN PARA HOY</span>
+            <h3 id="briefing-today-summary" style="font-size: 1.15rem; color: var(--text-main);"></h3>
+            <p id="briefing-today-detail" style="font-size: 0.88rem; color: var(--text-muted);"></p>
+        </div>
+
+        <!-- THREE PILLARS OF THE DAY -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 0.85rem;">
+            <div class="briefing-card">
+                <span style="font-size: 0.75rem; color: var(--accent); font-weight: 700;">🌅 MAÑANA (06:00 - 08:00)</span>
+                <div id="briefing-morning-content" style="font-size: 0.88rem; font-weight: 600;"></div>
+            </div>
+            <div class="briefing-card">
+                <span style="font-size: 0.75rem; color: var(--success); font-weight: 700;">💼 EMPRESA (09:00)</span>
+                <div style="font-size: 0.88rem; font-weight: 600;">Prácticas FCT (Puntualidad y seguimiento)</div>
+            </div>
+            <div class="briefing-card">
+                <span style="font-size: 0.75rem; color: var(--purple); font-weight: 700;">🏫 TARDE (18:00 - 22:00)</span>
+                <div id="briefing-afternoon-content" style="font-size: 0.88rem; font-weight: 600;"></div>
+            </div>
+        </div>
+
+        <!-- URGENT ALERTS -->
+        <div class="briefing-card" style="border-color: rgba(245, 158, 11, 0.4); background: rgba(245, 158, 11, 0.05);">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span style="font-size: 0.78rem; font-weight: 700; color: var(--warning);">⚠️ HITO CRÍTICO: ANTEPROYECTO TFC</span>
+                <span id="briefing-tfc-days" style="font-family: monospace; font-weight: 800; color: var(--warning); font-size: 1.05rem;"></span>
+            </div>
+            <p style="font-size: 0.82rem; color: var(--text-muted); margin-top: 0.2rem;">Límite oficial de entrega: <strong>30/11/2026 23:59</strong>. Recuerda revisar Objetivos y Tecnologías en la sesión de lunes.</p>
+        </div>
+
+        <!-- ACTION BUTTONS -->
+        <div style="display: flex; gap: 0.75rem; justify-content: space-between; align-items: center; flex-wrap: wrap; margin-top: 0.5rem;">
+            <button class="btn btn-warning" onclick="VoiceManager.speakBriefing()" title="Escuchar por voz">🎙️ Escuchar Resumen</button>
+            <div style="display: flex; gap: 0.5rem;">
+                <button class="btn btn-primary" onclick="closeBriefingModal(); switchTab('focus', document.querySelectorAll('.tab-btn')[3]); FocusTimer.syncWithCurrentSlot(); FocusTimer.start();">⏱️ Iniciar Estudio</button>
+                <button class="btn" onclick="closeBriefingModal()">Continuar al Panel</button>
+            </div>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem; color: var(--text-dim); border-top: 1px solid var(--border); padding-top: 0.85rem;">
+            <label style="display: flex; align-items: center; gap: 0.4rem; cursor: pointer;">
+                <input type="checkbox" id="chk-auto-briefing" onchange="AppSettings.set('showBriefingOnStartup', this.checked)">
+                Abrir este resumen automáticamente nada más abrir la página
+            </label>
+            <span style="color: var(--accent); cursor: pointer;" onclick="NotificationManager.requestPermission()">🔔 Activar notificaciones de PC</span>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL: SETTINGS & ALARMS -->
+<div class="modal-overlay" id="settings-modal">
+    <div class="modal-content" style="max-width: 520px;">
+        <div class="modal-header">
+            <div class="modal-title-box">
+                <h2>⚙️ Configuración de Avisos y Alarmas</h2>
+                <p style="color: var(--text-muted); font-size: 0.85rem;">Personaliza cómo y cuándo avisarte</p>
+            </div>
+            <button class="modal-close" onclick="closeSettingsModal()">✕</button>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 1.2rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <strong>🔔 Sonido de Alarma (Web Audio)</strong>
+                    <div style="font-size: 0.8rem; color: var(--text-muted);">Tono armónico al empezar y terminar sesiones</div>
+                </div>
+                <input type="checkbox" id="set-sound" style="width: 20px; height: 20px; accent-color: var(--accent);" onchange="AppSettings.set('soundEnabled', this.checked)">
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <strong>⏳ Aviso previo 5 minutos antes</strong>
+                    <div style="font-size: 0.8rem; color: var(--text-muted);">Te avisa antes de que arranque la sesión</div>
+                </div>
+                <input type="checkbox" id="set-lead" style="width: 20px; height: 20px; accent-color: var(--accent);" onchange="AppSettings.set('leadAlertEnabled', this.checked)">
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <strong>🖥️ Notificaciones de Escritorio</strong>
+                    <div style="font-size: 0.8rem; color: var(--text-muted);">Avisos nativos en tu ordenador aunque esté en segundo plano</div>
+                </div>
+                <button class="btn" onclick="NotificationManager.requestPermission(); updateSettingsUI();">Probar / Conceder</button>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <strong>🎙️ Voz al iniciar</strong>
+                    <div style="font-size: 0.8rem; color: var(--text-muted);">Lectura automática por voz del briefing del día</div>
+                </div>
+                <input type="checkbox" id="set-voice-startup" style="width: 20px; height: 20px; accent-color: var(--accent);" onchange="AppSettings.set('voiceOnStartup', this.checked)">
+            </div>
+
+            <div style="background: rgba(2, 6, 23, 0.4); border-radius: 10px; padding: 1rem; border: 1px solid var(--border);">
+                <div style="font-size: 0.82rem; font-weight: 700; margin-bottom: 0.4rem;">PRUEBA DE TONOS:</div>
+                <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                    <button class="btn" onclick="AudioManager.playChime('start')">🔔 Inicio de Clase</button>
+                    <button class="btn" onclick="AudioManager.playChime('warning')">⏳ Aviso 5 min</button>
+                    <button class="btn" onclick="AudioManager.playChime('finish')">🎉 Sesión Completada</button>
+                </div>
+            </div>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; margin-top: 1rem;">
+            <button class="btn btn-primary" onclick="closeSettingsModal()">Guardar y Cerrar</button>
+        </div>
+    </div>
+</div>
+
+
+<!-- MODAL CLOUD AUTH / SYNC FIREBASE -->
+<div class="modal-overlay" id="cloud-modal" style="display:none;" onclick="if(event.target===this) closeCloudModal()">
+    <div class="modal-card" style="max-width: 480px; text-align: left; background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 1.75rem; box-shadow: 0 20px 40px rgba(0,0,0,0.6);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+            <h2 style="font-size: 1.3rem; display: flex; align-items: center; gap: 0.5rem; margin: 0; color: var(--text-main);">
+                <span>☁️</span> Sincronización en la Nube
+            </h2>
+            <button class="btn" onclick="closeCloudModal()" style="padding: 0.25rem 0.6rem; cursor: pointer;">✕</button>
+        </div>
+
+        <!-- Estado NO autenticado -->
+        <div id="cloud-guest-view">
+            <p style="color: var(--text-muted); font-size: 0.88rem; margin-bottom: 1rem; line-height: 1.4;">
+                Inicia sesión o regístrate para que tu progreso de estudio, notas y configuración se guarden en tu base de datos Firebase. Podrás abrir esta app desde tu móvil o cualquier ordenador con todo sincronizado.
+            </p>
+            <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                <div>
+                    <label style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">Correo Electrónico</label>
+                    <input type="email" id="cloud-email" placeholder="tu@correo.com" style="width: 100%; box-sizing: border-box; padding: 0.65rem; border-radius: 8px; background: rgba(2, 6, 23, 0.6); border: 1px solid var(--border); color: #fff; margin-top: 0.25rem;">
+                </div>
+                <div>
+                    <label style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">Contraseña</label>
+                    <input type="password" id="cloud-password" placeholder="••••••••" style="width: 100%; box-sizing: border-box; padding: 0.65rem; border-radius: 8px; background: rgba(2, 6, 23, 0.6); border: 1px solid var(--border); color: #fff; margin-top: 0.25rem;">
+                </div>
+                <div id="cloud-error-msg" style="color: var(--danger); font-size: 0.82rem; min-height: 1.2rem;"></div>
+                <div style="display: flex; gap: 0.5rem; margin-top: 0.25rem;">
+                    <button class="btn btn-primary" style="flex: 1;" onclick="window.FirebaseSync.login()">Iniciar Sesión</button>
+                    <button class="btn" style="flex: 1;" onclick="window.FirebaseSync.register()">Registrarse</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Estado AUTENTICADO -->
+        <div id="cloud-user-view" style="display:none;">
+            <div style="background: rgba(16, 185, 129, 0.12); border: 1px solid var(--success); border-radius: 10px; padding: 0.9rem; margin-bottom: 1rem;">
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <span style="display:inline-block; width:10px; height:10px; border-radius:50%; background:var(--success); box-shadow: 0 0 8px var(--success);"></span>
+                    <strong style="color: var(--success); font-size: 0.95rem;">Sesión Activa en la Nube</strong>
+                </div>
+                <div id="cloud-user-display" style="font-size: 0.85rem; color: var(--text-main); margin-top: 0.4rem; word-break: break-all;"></div>
+                <div id="cloud-last-sync" style="font-size: 0.78rem; color: var(--text-muted); margin-top: 0.2rem;"></div>
+            </div>
+            <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1.2rem; line-height: 1.4;">
+                Cada cambio de tarea o configuración se guarda automáticamente en Firebase Firestore.
+            </p>
+            <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                <button class="btn" onclick="window.FirebaseSync.forcePush()" style="border-color: #38bdf8; color: #38bdf8;">☁️ Subir Estado Local a la Nube</button>
+                <button class="btn" onclick="window.FirebaseSync.forcePull()">🔄 Recargar Datos desde la Nube</button>
+                <button class="btn" onclick="window.FirebaseSync.logout()" style="border-color: var(--danger); color: var(--danger); margin-top: 0.5rem;">Cerrar Sesión</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- TOAST CONTAINER -->
+<div class="toast-container" id="toast-container"></div>
+
+<script>
+const STORAGE_KEY = 'daw2_tracker_jcgm_v1';
+const SETTINGS_KEY = 'daw2_settings_jcgm_v1';
+
+// COURSE DATA
+const initialCourseData = [
+    {
+        id: 'tfc',
+        code: '0616',
+        name: 'Proyecto Intermodular (TFC)',
+        schedule: 'Lunes 06:00 - 07:00',
+        tasks: [
+            { id: 'tfc-1', title: 'Apartado 1: Descripción (Problema y Solución)', type: 'tfc', plan: 'Octubre 2026', deadline: '30/11/2026', done: false },
+            { id: 'tfc-2', title: 'Apartado 2: Objetivos (General y 3 Específicos)', type: 'tfc', plan: 'Octubre 2026', deadline: '30/11/2026', done: false },
+            { id: 'tfc-3', title: 'Apartado 3: Funcionalidades (Principales y Secundarias)', type: 'tfc', plan: 'Noviembre 2026', deadline: '30/11/2026', done: false },
+            { id: 'tfc-4', title: 'Apartado 4: Tecnologías y Metodología Kanban', type: 'tfc', plan: 'Noviembre 2026', deadline: '30/11/2026', done: false },
+            { id: 'tfc-5', title: 'ENTREGA OFICIAL ANTEPROYECTO (.docx)', type: 'tfc', plan: 'Noviembre 2026', deadline: '30/11/2026', done: false },
+            { id: 'tfc-6', title: 'Desarrollo técnico y Memoria Final TFC', type: 'tfc', plan: 'Dic 2026 - Mayo 2027', deadline: 'Mayo 2027', done: false }
+        ]
+    },
+    {
+        id: 'dwec',
+        code: '0612',
+        name: 'Desarrollo Web en Entorno Cliente',
+        schedule: 'Estudio: Lun 07:00-08:00 | Clases: Mar/Mié 18:00',
+        tasks: [
+            { id: 'dwec-t1', title: 'U1: Selección de arquitecturas y herramientas (Test 1)', type: 'test', deadline: 'Entregado 17/09/2026', done: true },
+            { id: 'dwec-t2', title: 'U2: Manejo de la sintaxis del lenguaje (Test 2)', type: 'test', deadline: 'Entregado 21/09/2026', done: true },
+            { id: 'dwec-t3', title: 'U3: Objetos predefinidos del lenguaje JS (Test 3)', type: 'test', deadline: 'Entregado 04/10/2026', done: true },
+            { id: 'dwec-t4', title: 'U4: Arrays, funciones y objetos definidos por usuario (Test 4)', type: 'test', plan: 'Noviembre 2026', deadline: '23/05/2027', done: false },
+            { id: 'dwec-w1', title: 'Actividad Evaluable 1: Creación de un juego con JavaScript', type: 'work', plan: 'Febrero 2027', deadline: '23/05/2027', done: false },
+            { id: 'dwec-t5', title: 'U5: Interacción con el usuario. Eventos y formularios (Test 5)', type: 'test', plan: 'Diciembre 2026', deadline: '23/05/2027', done: false },
+            { id: 'dwec-t6', title: 'U6: Modelo de objetos del documento - DOM (Test 6)', type: 'test', plan: 'Enero 2027', deadline: '23/05/2027', done: false },
+            { id: 'dwec-t7', title: 'U7: Comunicación asíncrona - AJAX (Test 7)', type: 'test', plan: 'Febrero 2027', deadline: '23/05/2027', done: false },
+            { id: 'dwec-t8', title: 'U8: Almacenamiento de datos en el lado cliente (Test 8)', type: 'test', plan: 'Marzo 2027', deadline: '23/05/2027', done: false },
+            { id: 'dwec-w2', title: 'Actividad Evaluable 2: Creación de una aplicación mediante Vue', type: 'work', plan: 'Abril 2027', deadline: '23/05/2027', done: false },
+            { id: 'dwec-t9', title: 'U9: Integración avanzada de componentes (Test 9)', type: 'test', plan: 'Abril 2027', deadline: '23/05/2027', done: false }
+        ]
+    },
+    {
+        id: 'dwes',
+        code: '0613',
+        name: 'Desarrollo Web en Entorno Servidor',
+        schedule: 'Estudio: Mar 06:00-08:00 | Clases: Mar 19h, Jue 18-20h',
+        tasks: [
+            { id: 'dwes-t1', title: 'U1: Selección de arquitecturas y herramientas (Test 1)', type: 'test', deadline: 'Entregado 22/09/2026', done: true },
+            { id: 'dwes-t2', title: 'U2: Inserción de código en páginas web (Test 2)', type: 'test', deadline: 'Entregado 28/09/2026', done: true },
+            { id: 'dwes-t3', title: 'U3: Programación basada en lenguajes de marcas (Test 3)', type: 'test', deadline: 'Entregado 14/10/2026', done: true },
+            { id: 'dwes-w1', title: 'Actividad Evaluable 1: Configuración del entorno de trabajo', type: 'work', plan: 'Noviembre 2026', deadline: '23/05/2027', done: false },
+            { id: 'dwes-t4', title: 'U4: Generación dinámica de páginas web (Test 4)', type: 'test', plan: 'Noviembre 2026', deadline: '23/05/2027', done: false },
+            { id: 'dwes-t5', title: 'U5: Desarrollo de aplicaciones web con código embebido (Test 5)', type: 'test', plan: 'Diciembre 2026', deadline: '23/05/2027', done: false },
+            { id: 'dwes-t6', title: 'U6: Utilización de técnicas de acceso a datos (Test 6)', type: 'test', plan: 'Enero 2027', deadline: '23/05/2027', done: false },
+            { id: 'dwes-t7', title: 'U7: Programación de servicios web (Test 7)', type: 'test', plan: 'Febrero 2027', deadline: '23/05/2027', done: false },
+            { id: 'dwes-t8', title: 'U8: Generación dinámica de páginas web interactivas (Test 8)', type: 'test', plan: 'Marzo 2027', deadline: '23/05/2027', done: false },
+            { id: 'dwes-t9', title: 'U9: Desarrollo de aplicaciones web híbridas (Test 9)', type: 'test', plan: 'Abril 2027', deadline: '23/05/2027', done: false },
+            { id: 'dwes-w2', title: 'Actividad Evaluable 2: Creación de una aplicación en PHP', type: 'work', plan: 'Marzo - Abril 2027', deadline: '23/05/2027', done: false }
+        ]
+    },
+    {
+        id: 'daw',
+        code: '0614',
+        name: 'Despliegue de Aplicaciones Web',
+        schedule: 'Estudio: Mié 06:00-07:00 | Clases: Vie 18:00-19:00',
+        tasks: [
+            { id: 'daw-t1', title: 'U1: Implantación de arquitecturas web (Test 1)', type: 'test', deadline: 'Entregado 23/09/2026', done: true },
+            { id: 'daw-t2', title: 'U2: Administración de servidores web (Test 2)', type: 'test', plan: 'Noviembre 2026', deadline: '23/05/2027', done: false },
+            { id: 'daw-t3', title: 'U3: Administración de servidores de aplicaciones (Test 3)', type: 'test', plan: 'Diciembre 2026', deadline: '23/05/2027', done: false },
+            { id: 'daw-w1', title: 'Actividad Evaluable 1: Servidor Apache y publicación web', type: 'work', plan: 'Dic 2026 / Ene 2027', deadline: '23/05/2027', done: false },
+            { id: 'daw-t4', title: 'U4: Servidores de transferencia de archivos (Test 4)', type: 'test', plan: 'Enero 2027', deadline: '23/05/2027', done: false },
+            { id: 'daw-t5', title: 'U5: Servicios de red implicados en el despliegue (Test 5)', type: 'test', plan: 'Febrero 2027', deadline: '23/05/2027', done: false },
+            { id: 'daw-t6', title: 'U6: Documentación, control de versiones e integración continua (Test 6)', type: 'test', plan: 'Febrero 2027', deadline: '23/05/2027', done: false },
+            { id: 'daw-w2', title: 'Actividad Evaluable 2: Despliegue en Docker y CI con GitHub', type: 'work', plan: 'Febrero 2027', deadline: '23/05/2027', done: false }
+        ]
+    },
+    {
+        id: 'diw',
+        code: '0615',
+        name: 'Diseño de Interfaces Web',
+        schedule: 'Estudio: Jue 06:00-07:00 | Clases: Lun 20:00-21:00',
+        tasks: [
+            { id: 'diw-t1', title: 'U1: Planificación de interfaces gráficas (Test 1)', type: 'test', deadline: 'Entregado 23/09/2026', done: true },
+            { id: 'diw-t2', title: 'U2: Uso de estilos (Test 2)', type: 'test', plan: 'Noviembre 2026', deadline: '23/05/2027', done: false },
+            { id: 'diw-w1', title: 'Actividad Evaluable 1: Aplicación de estilos CSS a página web', type: 'work', plan: 'Diciembre 2026', deadline: '23/05/2027', done: false },
+            { id: 'diw-t3', title: 'U3: Implantación de contenido multimedia (Test 3)', type: 'test', plan: 'Diciembre 2026', deadline: '23/05/2027', done: false },
+            { id: 'diw-t4', title: 'U4: Integración de contenido interactivo (Test 4)', type: 'test', plan: 'Enero 2027', deadline: '23/05/2027', done: false },
+            { id: 'diw-w2', title: 'Actividad Evaluable 2: Aplicación de estilos Tailwind', type: 'work', plan: 'Enero 2027', deadline: '23/05/2027', done: false },
+            { id: 'diw-t5', title: 'U5: Diseño de webs accesibles (Test 5)', type: 'test', plan: 'Febrero 2027', deadline: '23/05/2027', done: false },
+            { id: 'diw-t6', title: 'U6: Implementación de la usabilidad en la web (Test 6)', type: 'test', plan: 'Marzo 2027', deadline: '23/05/2027', done: false }
+        ]
+    },
+    {
+        id: 'python',
+        code: 'CMO-316',
+        name: 'Módulo Optativo: Python',
+        schedule: 'Estudio: Mié 07:00-08:00 | Clases: Mié 20:00-21:00',
+        tasks: [
+            { id: 'py-t1', title: 'U1: Identificación de los elementos de un programa (Test 1)', type: 'test', deadline: 'Entregado 23/09/2026', done: true },
+            { id: 'py-t2', title: 'U2: Uso de estructuras de control (Test 2)', type: 'test', plan: 'Noviembre 2026', deadline: '23/05/2027', done: false },
+            { id: 'py-t3', title: 'U3: Funciones y Recursividad (Test 3)', type: 'test', plan: 'Diciembre 2026', deadline: '23/05/2027', done: false },
+            { id: 'py-w1', title: 'Actividad Evaluable 1: Funciones básicas y avanzadas de Python', type: 'work', plan: 'Enero 2027', deadline: '23/05/2027', done: false },
+            { id: 'py-t4', title: 'U4: Cadenas, Listas, Tuplas y Diccionarios (Test 4)', type: 'test', plan: 'Febrero 2027', deadline: '23/05/2027', done: false },
+            { id: 'py-t5', title: 'U5: Lectura y escritura de información (Test 5)', type: 'test', plan: 'Marzo 2027', deadline: '23/05/2027', done: false },
+            { id: 'py-t6', title: 'U6: POO. Encapsulación, herencia y polimorfismo (Test 6)', type: 'test', plan: 'Abril 2027', deadline: '23/05/2027', done: false },
+            { id: 'py-w2', title: 'Actividad Evaluable 2: Aplicación práctica avanzada en Python', type: 'work', plan: 'Abril 2027', deadline: '23/05/2027', done: false }
+        ]
+    },
+    {
+        id: 'ingles',
+        code: '0179',
+        name: 'Inglés Profesional',
+        schedule: 'Estudio: Vie 06:00-07:00 | Clases: Mar 20:00-21:00',
+        tasks: [
+            { id: 'ing-t1', title: 'U1: Comprensión oral precisa (Test 1)', type: 'test', deadline: 'Entregado 06/10/2026', done: true },
+            { id: 'ing-w1', title: 'Actividad Evaluable Unidad 1', type: 'work', plan: 'Noviembre 2026', deadline: '23/05/2027', done: false },
+            { id: 'ing-t2', title: 'U2: Producción oral precisa (Test 2)', type: 'test', plan: 'Diciembre 2026', deadline: '23/05/2027', done: false },
+            { id: 'ing-w2', title: 'Actividad Evaluable Unidad 2', type: 'work', plan: 'Enero 2027', deadline: '23/05/2027', done: false },
+            { id: 'ing-t3', title: 'U3: Interpretación de textos en soporte papel y telemático (Test 3)', type: 'test', plan: 'Febrero 2027', deadline: '23/05/2027', done: false },
+            { id: 'ing-w3', title: 'Actividad Evaluable Unidad 3', type: 'work', plan: 'Marzo 2027', deadline: '23/05/2027', done: false },
+            { id: 'ing-t4', title: 'U4: Emisión de textos escritos (Test 4)', type: 'test', plan: 'Abril 2027', deadline: '23/05/2027', done: false },
+            { id: 'ing-w4', title: 'Actividad Evaluable Unidad 4', type: 'work', plan: 'Abril 2027', deadline: '23/05/2027', done: false }
+        ]
+    },
+    {
+        id: 'ipe2',
+        code: '1710',
+        name: 'Itinerario Personal para la Empleabilidad II',
+        schedule: 'Estudio: Vie 07:00-08:00 | Clases: Mié 19:00-20:00',
+        tasks: [
+            { id: 'ipe-t1', title: 'U1: Procesos selectivos de empleo (Test 1)', type: 'test', deadline: 'Entregado 23/09/2026', done: true },
+            { id: 'ipe-w1', title: 'Actividad Evaluable 1: Carta de motivación sector tech', type: 'work', plan: 'Noviembre 2026', deadline: '23/05/2027', done: false },
+            { id: 'ipe-t2', title: 'U2: Competencias personales, sociales y emocionales (Test 2)', type: 'test', plan: 'Diciembre 2026', deadline: '23/05/2027', done: false },
+            { id: 'ipe-w2', title: 'Actividad Evaluable 2: Simulación de entrevista', type: 'work', plan: 'Diciembre 2026', deadline: '23/05/2027', done: false },
+            { id: 'ipe-t3', title: 'U3: Habilidades emprendedoras (Test 3)', type: 'test', plan: 'Enero 2027', deadline: '23/05/2027', done: false },
+            { id: 'ipe-w3', title: 'Actividad Evaluable 3: Propuesta innovadora impacto social', type: 'work', plan: 'Febrero 2027', deadline: '23/05/2027', done: false },
+            { id: 'ipe-t4', title: 'U4: Ideas de emprendimiento (Test 4)', type: 'test', plan: 'Marzo 2027', deadline: '23/05/2027', done: false },
+            { id: 'ipe-w4', title: 'Actividad Evaluable 4: Idea de negocio con impacto social', type: 'work', plan: 'Marzo 2027', deadline: '23/05/2027', done: false },
+            { id: 'ipe-t5', title: 'U5: El proyecto emprendedor (Test 5)', type: 'test', plan: 'Abril 2027', deadline: '23/05/2027', done: false },
+            { id: 'ipe-w5', title: 'Actividad Evaluable 5: Proyecto emprendedor tecnológico', type: 'work', plan: 'Abril 2027', deadline: '23/05/2027', done: false }
+        ]
+    },
+    {
+        id: 'dig',
+        code: '1665',
+        name: 'Digitalización Aplicada a los Sectores Productivos',
+        schedule: 'Estudio: Jue 07:00-07:30 | Clases: Vie 19:00-20:00',
+        tasks: [
+            { id: 'dig-t1', title: 'U1: Digitalización en los sectores productivos (Test 1)', type: 'test', deadline: 'Entregado 05/10/2026', done: true },
+            { id: 'dig-t2', title: 'U2: Caracterización de las tecnologías habilitadoras (Test 2)', type: 'test', plan: 'Noviembre 2026', deadline: '23/05/2027', done: false },
+            { id: 'dig-t3', title: 'U3: Cloud y sistemas conectados (Test 3)', type: 'test', plan: 'Diciembre 2026', deadline: '23/05/2027', done: false },
+            { id: 'dig-w1', title: 'Actividad Evaluable 1: Análisis estratégico Cloud y Edge Computing', type: 'work', plan: 'Enero 2027', deadline: '23/05/2027', done: false },
+            { id: 'dig-t4', title: 'U4: Aplicación de la Inteligencia Artificial (Test 4)', type: 'test', plan: 'Febrero 2027', deadline: '23/05/2027', done: false },
+            { id: 'dig-t5', title: 'U5: Evaluación de datos (Test 5)', type: 'test', plan: 'Marzo 2027', deadline: '23/05/2027', done: false },
+            { id: 'dig-t6', title: 'U6: Desarrollo de un Proyecto (Test 6)', type: 'test', plan: 'Abril 2027', deadline: '23/05/2027', done: false },
+            { id: 'dig-w2', title: 'Actividad Evaluable 2: Diseño estratégico transformación digital', type: 'work', plan: 'Abril 2027', deadline: '23/05/2027', done: false }
+        ]
+    },
+    {
+        id: 'sost',
+        code: '1708',
+        name: 'Sostenibilidad Aplicada al Sistema Productivo',
+        schedule: 'Estudio: Jue 07:30-08:00 | Clases: Lun 21:00-22:00',
+        tasks: [
+            { id: 'sos-t1', title: 'U1: Sostenibilidad, desarrollo sostenible y marco ASG (Test 1)', type: 'test', deadline: 'Entregado 05/10/2026', done: true },
+            { id: 'sos-t2', title: 'U2: Retos ambientales y sociales del siglo XXI (Test 2)', type: 'test', plan: 'Noviembre 2026', deadline: '23/05/2027', done: false },
+            { id: 'sos-w1', title: 'Actividad Evaluable 1: Soluciones para retos ambientales y sociales', type: 'work', plan: 'Enero 2027', deadline: '23/05/2027', done: false },
+            { id: 'sos-t3', title: 'U3: Sostenibilidad en el desempeño profesional (Test 3)', type: 'test', plan: 'Enero 2027', deadline: '23/05/2027', done: false },
+            { id: 'sos-t4', title: 'U4: Economía verde y circular (Test 4)', type: 'test', plan: 'Febrero 2027', deadline: '23/05/2027', done: false },
+            { id: 'sos-t5', title: 'U5: Actividades sostenibles y normativa ambiental (Test 5)', type: 'test', plan: 'Marzo 2027', deadline: '23/05/2027', done: false },
+            { id: 'sos-t6', title: 'U6: Plan de sostenibilidad empresarial (Test 6)', type: 'test', plan: 'Abril 2027', deadline: '23/05/2027', done: false },
+            { id: 'sos-w2', title: 'Actividad Evaluable 2: Implementación de un Informe de Sostenibilidad', type: 'work', plan: 'Abril 2027', deadline: '23/05/2027', done: false }
+        ]
+    }
+];
+
+// DETAILED WEEKLY SCHEDULE FOR SMART DETECTION & ALERTS
+const weeklySchedule = [
+    {
+        day: 'Lunes', dayIndex: 1,
+        morning: [
+            { id: 'lun-m1', time: '06:00 - 07:00', startHour: 6, startMin: 0, endHour: 7, endMin: 0, subject: 'TFC (Proyecto Intermodular)', code: '0616', type: 'study', tip: 'Enfoque en Anteproyecto (Redacción de Objetivos y Funcionalidades)' },
+            { id: 'lun-m2', time: '07:00 - 08:00', startHour: 7, startMin: 0, endHour: 8, endMin: 0, subject: 'Desarrollo Web en Entorno Cliente (DWEC)', code: '0612', type: 'study', tip: 'Estudio de sintaxis JS, ejercicios y DOM' }
+        ],
+        fct: { time: '09:00 - 15:00', text: 'Prácticas de empresa (FCT)', type: 'fct' },
+        afternoon: [
+            { id: 'lun-t1', time: '20:00 - 21:00', startHour: 20, startMin: 0, endHour: 21, endMin: 0, subject: 'Diseño de Interfaces Web (DIW)', code: '0615', type: 'class', tip: 'Clase presencial en Moncloa' },
+            { id: 'lun-t2', time: '21:00 - 22:00', startHour: 21, startMin: 0, endHour: 22, endMin: 0, subject: 'Sostenibilidad Aplicada (SOST)', code: '1708', type: 'class', tip: 'Clase presencial en Moncloa' }
+        ]
+    },
+    {
+        day: 'Martes', dayIndex: 2,
+        morning: [
+            { id: 'mar-m1', time: '06:00 - 08:00', startHour: 6, startMin: 0, endHour: 8, endMin: 0, subject: 'Desarrollo Web en Entorno Servidor (DWES)', code: '0613', type: 'study', tip: 'Bloque intensivo de 2 horas: PHP, backend y acceso a datos' }
+        ],
+        fct: { time: '09:00 - 15:00', text: 'Prácticas de empresa (FCT)', type: 'fct' },
+        afternoon: [
+            { id: 'mar-t1', time: '18:00 - 19:00', startHour: 18, startMin: 0, endHour: 19, endMin: 0, subject: 'Desarrollo Web en Entorno Cliente (DWEC)', code: '0612', type: 'class', tip: 'Clase presencial en Moncloa' },
+            { id: 'mar-t2', time: '19:00 - 20:00', startHour: 19, startMin: 0, endHour: 20, endMin: 0, subject: 'Desarrollo Web en Entorno Servidor (DWES)', code: '0613', type: 'class', tip: 'Clase presencial en Moncloa' },
+            { id: 'mar-t3', time: '20:00 - 21:00', startHour: 20, startMin: 0, endHour: 21, endMin: 0, subject: 'Inglés Profesional (ING)', code: '0179', type: 'class', tip: 'Clase presencial en Moncloa' }
+        ]
+    },
+    {
+        day: 'Miércoles', dayIndex: 3,
+        morning: [
+            { id: 'mie-m1', time: '06:00 - 07:00', startHour: 6, startMin: 0, endHour: 7, endMin: 0, subject: 'Despliegue de Aplicaciones Web (DAW)', code: '0614', type: 'study', tip: 'Servidores web, Apache, Docker y CI/CD' },
+            { id: 'mie-m2', time: '07:00 - 08:00', startHour: 7, startMin: 0, endHour: 8, endMin: 0, subject: 'Módulo Optativo Python (PYT)', code: 'CMO-316', type: 'study', tip: 'Ejercicios de sintaxis, funciones avanzadas y POO' }
+        ],
+        fct: { time: '09:00 - 15:00', text: 'Prácticas de empresa (FCT)', type: 'fct' },
+        afternoon: [
+            { id: 'mie-t1', time: '18:00 - 19:00', startHour: 18, startMin: 0, endHour: 19, endMin: 0, subject: 'Desarrollo Web en Entorno Cliente (DWEC)', code: '0612', type: 'class', tip: 'Clase presencial en Moncloa' },
+            { id: 'mie-t2', time: '19:00 - 20:00', startHour: 19, startMin: 0, endHour: 20, endMin: 0, subject: 'Itinerario Personal Empleabilidad II (IPE II)', code: '1710', type: 'class', tip: 'Clase presencial en Moncloa' },
+            { id: 'mie-t3', time: '20:00 - 21:00', startHour: 20, startMin: 0, endHour: 21, endMin: 0, subject: 'Módulo Optativo Python (PYT)', code: 'CMO-316', type: 'class', tip: 'Clase presencial en Moncloa' }
+        ]
+    },
+    {
+        day: 'Jueves', dayIndex: 4,
+        morning: [
+            { id: 'jue-m1', time: '06:00 - 07:00', startHour: 6, startMin: 0, endHour: 7, endMin: 0, subject: 'Diseño de Interfaces Web (DIW)', code: '0615', type: 'study', tip: 'CSS avanzado, responsive design, wireframes y accesibilidad' },
+            { id: 'jue-m2', time: '07:00 - 08:00', startHour: 7, startMin: 0, endHour: 8, endMin: 0, subject: 'Digitalización (DIG) y Sostenibilidad (SOST)', code: '1665 / 1708', type: 'study', tip: 'Estudio de transversales, nube, ASG y casos prácticos' }
+        ],
+        fct: { time: '09:00 - 15:00', text: 'Prácticas de empresa (FCT)', type: 'fct' },
+        afternoon: [
+            { id: 'jue-t1', time: '18:00 - 20:00', startHour: 18, startMin: 0, endHour: 20, endMin: 0, subject: 'Desarrollo Web en Entorno Servidor (DWES)', code: '0613', type: 'class', tip: 'Sesión doble de 2 horas en Moncloa' }
+        ]
+    },
+    {
+        day: 'Viernes', dayIndex: 5,
+        morning: [
+            { id: 'vie-m1', time: '06:00 - 08:00', startHour: 6, startMin: 0, endHour: 8, endMin: 0, subject: 'Inglés Profesional (ING) e IPE II', code: '0179 / 1710', type: 'study', tip: 'Redacción de documentos técnicos, cartas de motivación y repaso semanal' }
+        ],
+        fct: { time: '09:00 - 15:00', text: 'Prácticas de empresa (FCT)', type: 'fct' },
+        afternoon: [
+            { id: 'vie-t1', time: '18:00 - 19:00', startHour: 18, startMin: 0, endHour: 19, endMin: 0, subject: 'Despliegue de Aplicaciones Web (DAW)', code: '0614', type: 'class', tip: 'Clase presencial en Moncloa' },
+            { id: 'vie-t2', time: '19:00 - 20:00', startHour: 19, startMin: 0, endHour: 20, endMin: 0, subject: 'Digitalización Aplicada (DIG)', code: '1665', type: 'class', tip: 'Clase presencial en Moncloa' }
+        ]
+    }
+];
+
+let courseData = [];
+
+// APP SETTINGS
+const AppSettings = {
+    data: {
+        soundEnabled: true,
+        leadAlertEnabled: true,
+        showBriefingOnStartup: true,
+        voiceOnStartup: false
+    },
+    load() {
+        try {
+            const s = localStorage.getItem(SETTINGS_KEY);
+            if (s) this.data = Object.assign(this.data, JSON.parse(s));
+        } catch(e) {}
+    },
+        save() {
+        try {
+            localStorage.setItem(SETTINGS_KEY, JSON.stringify(this.data));
+            if (window.FirebaseSync && typeof window.FirebaseSync.triggerSave === 'function') {
+                window.FirebaseSync.triggerSave();
+            }
+        } catch(e) {}
+    }, catch(e) {}
+    },
+    set(key, val) {
+        this.data[key] = val;
+        this.save();
+    }
+};
+
+// AUDIO MANAGER (WEB AUDIO API SYNTHESIZER)
+const AudioManager = {
+    ctx: null,
+    init() {
+        if (!this.ctx) {
+            const AudioCtx = window.AudioContext || window.webkitAudioContext;
+            if (AudioCtx) this.ctx = new AudioCtx();
+        }
+        if (this.ctx && this.ctx.state === 'suspended') {
+            this.ctx.resume();
+        }
+    },
+    playChime(type = 'start') {
+        if (!AppSettings.data.soundEnabled) return;
+        try {
+            this.init();
+            if (!this.ctx) return;
+            const now = this.ctx.currentTime;
+            
+            if (type === 'start') {
+                // Crystal Harmonic Chime (C5 - E5 - G5 - C6)
+                [523.25, 659.25, 783.99, 1046.50].forEach((freq, idx) => {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(freq, now + idx * 0.12);
+                    gain.gain.setValueAtTime(0.2, now + idx * 0.12);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.12 + 1.2);
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start(now + idx * 0.12);
+                    osc.stop(now + idx * 0.12 + 1.3);
+                });
+            } else if (type === 'warning') {
+                // Gentle Two-Tone Ping (A5 -> D6)
+                [880, 1174.66].forEach((freq, idx) => {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(freq, now + idx * 0.18);
+                    gain.gain.setValueAtTime(0.18, now + idx * 0.18);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.18 + 0.9);
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start(now + idx * 0.18);
+                    osc.stop(now + idx * 0.18 + 1.0);
+                });
+            } else if (type === 'finish') {
+                // Triunfo Chime (G4 - C5 - E5 - G5)
+                [392.00, 523.25, 659.25, 783.99].forEach((freq, idx) => {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(freq, now + idx * 0.14);
+                    gain.gain.setValueAtTime(0.22, now + idx * 0.14);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.14 + 1.5);
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start(now + idx * 0.14);
+                    osc.stop(now + idx * 0.14 + 1.6);
+                });
+            }
+        } catch (e) {
+            console.warn('Audio playback not permitted yet or failed:', e);
+        }
+    }
+};
+
+// NOTIFICATION MANAGER (DESKTOP)
+const NotificationManager = {
+    async requestPermission() {
+        if (!('Notification' in window)) {
+            showToast('Tu navegador no soporta notificaciones de escritorio', 'warning');
+            return false;
+        }
+        if (Notification.permission === 'granted') {
+            showToast('✅ Notificaciones de escritorio ya activadas', 'success');
+            return true;
+        }
+        const res = await Notification.requestPermission();
+        if (res === 'granted') {
+            showToast('🎉 ¡Notificaciones activadas con éxito!', 'success');
+            return true;
+        } else {
+            showToast('Permiso de notificaciones denegado', 'warning');
+            return false;
+        }
+    },
+    send(title, body) {
+        if (!('Notification' in window) || Notification.permission !== 'granted') return;
+        try {
+            new Notification(title, {
+                body: body,
+                tag: 'daw-alert-' + Date.now(),
+                icon: 'https://cdn-icons-png.flaticon.com/512/3588/3588658.png'
+            });
+        } catch(e) {}
+    }
+};
+
+// VOICE MANAGER (SPEECH SYNTHESIS)
+const VoiceManager = {
+    speak(text) {
+        if (!('speechSynthesis' in window)) return;
+        window.speechSynthesis.cancel();
+        const ut = new SpeechSynthesisUtterance(text);
+        ut.lang = 'es-ES';
+        ut.rate = 1.05;
+        ut.pitch = 1.0;
+        const voices = window.speechSynthesis.getVoices();
+        const esV = voices.find(v => v.lang.startsWith('es'));
+        if (esV) ut.voice = esV;
+        window.speechSynthesis.speak(ut);
+    },
+    speakBriefing() {
+        const now = getCurrentDate();
+        const dayIdx = now.getDay();
+        const days = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+        const dayName = days[dayIdx];
+        const tfcDays = Math.ceil((new Date('2026-11-30T23:59:59') - now) / (1000 * 60 * 60 * 24));
+
+        let msg = `¡Hola José Carlos! Hoy es ${dayName}. `;
+        const todayObj = weeklySchedule.find(d => d.dayIndex === dayIdx);
+        if (todayObj) {
+            const morningSummary = todayObj.morning.map(m => m.subject).join(' y ');
+            msg += `Tu foco de estudio matutino es: ${morningSummary}. `;
+            msg += `A las nueve tienes prácticas en empresa. `;
+            if (todayObj.afternoon.length > 0) {
+                const aftSummary = todayObj.afternoon.map(a => `${a.subject} a las ${a.time.split(' - ')[0]}`).join(', ');
+                msg += `Por la tarde tienes clases presenciales en Moncloa de: ${aftSummary}. `;
+            }
+        } else {
+            msg += `Es fin de semana, buen momento para descansar o repasar a tu ritmo. `;
+        }
+        msg += `Recuerda que faltan ${tfcDays} días para la entrega del anteproyecto del TFC. ¡Mucho ánimo y a por ello!`;
+        this.speak(msg);
+    }
+};
+
+// SIMULATOR TIME MACHINE
+let simulatedDate = null;
+
+function getCurrentDate() {
+    return simulatedDate ? new Date(simulatedDate) : new Date();
+}
+
+function handleSimulationChange(val) {
+    const baseDate = new Date();
+    // Helper to find a specific weekday in current week
+    function getDateForDay(targetDayIdx, hour, minute) {
+        const d = new Date(baseDate);
+        const currentDay = d.getDay();
+        const diff = targetDayIdx - currentDay;
+        d.setDate(d.getDate() + diff);
+        d.setHours(hour, minute, 0, 0);
+        return d;
+    }
+
+    if (val === 'real') {
+        simulatedDate = null;
+        showToast('⏱️ Modo tiempo real activado', 'success');
+    } else if (val === 'lun_0615') {
+        simulatedDate = getDateForDay(1, 6, 15);
+        showToast('🕹️ Simulación: Lunes 06:15 (Sesión TFC)', 'warning');
+    } else if (val === 'lun_0656') {
+        simulatedDate = getDateForDay(1, 6, 56);
+        showToast('🕹️ Simulación: Lunes 06:56 (Aviso 5m DWEC)', 'warning');
+    } else if (val === 'mar_0630') {
+        simulatedDate = getDateForDay(2, 6, 30);
+        showToast('🕹️ Simulación: Martes 06:30 (DWES Servidor 2h)', 'warning');
+    } else if (val === 'mie_0715') {
+        simulatedDate = getDateForDay(3, 7, 15);
+        showToast('🕹️ Simulación: Miércoles 07:15 (Python Optativa)', 'warning');
+    } else if (val === 'jue_1830') {
+        simulatedDate = getDateForDay(4, 18, 30);
+        showToast('🕹️ Simulación: Jueves 18:30 (Presencial Servidor)', 'warning');
+    } else if (val === 'vie_0700') {
+        simulatedDate = getDateForDay(5, 7, 0);
+        showToast('🕹️ Simulación: Viernes 07:00 (Inglés e IPE II)', 'warning');
+    } else if (val === 'sab_1100') {
+        simulatedDate = getDateForDay(6, 11, 0);
+        showToast('🕹️ Simulación: Sábado 11:00 (Fin de semana)', 'warning');
+    }
+
+    updateLiveClockAndStatus();
+    updateStats();
+    renderSchedule();
+}
+
+// FOCUS TIMER (POMODORO)
+const FocusTimer = {
+    duration: 25 * 60,
+    remaining: 25 * 60,
+    interval: null,
+    isRunning: false,
+    label: 'Enfoque',
+
+    setPreset(minutes, label = 'Enfoque') {
+        this.pause();
+        this.duration = minutes * 60;
+        this.remaining = this.duration;
+        this.label = label;
+        this.updateUI();
+    },
+    syncWithCurrentSlot() {
+        const now = getCurrentDate();
+        const active = getActiveOrNextSlot(now);
+        if (active.current) {
+            const nowMins = now.getHours() * 60 + now.getMinutes();
+            const endMins = active.current.endHour * 60 + active.current.endMin;
+            const diffMins = Math.max(1, endMins - nowMins);
+            this.setPreset(diffMins, active.current.subject.split('(')[0].trim());
+            showToast(`Sincronizado: ${diffMins} minutos restantes para ${active.current.subject}`, 'success');
+        } else if (active.next) {
+            this.setPreset(25, 'Preparación para ' + active.next.subject.split('(')[0].trim());
+        } else {
+            this.setPreset(25, 'Repaso Libre');
+        }
+    },
+    toggle() {
+        if (this.isRunning) this.pause();
+        else this.start();
+    },
+    start() {
+        if (this.isRunning) return;
+        AudioManager.init();
+        this.isRunning = true;
+        document.getElementById('timer-start-btn').textContent = '⏸ Pausar';
+        this.interval = setInterval(() => {
+            if (this.remaining > 0) {
+                this.remaining--;
+                this.updateUI();
+            } else {
+                this.finish();
+            }
+        }, 1000);
+        this.updateUI();
+    },
+    pause() {
+        this.isRunning = false;
+        clearInterval(this.interval);
+        const btn = document.getElementById('timer-start-btn');
+        if (btn) btn.textContent = '▶ Iniciar';
+    },
+    reset() {
+        this.pause();
+        this.remaining = this.duration;
+        this.updateUI();
+    },
+    finish() {
+        this.pause();
+        AudioManager.playChime('finish');
+        NotificationManager.send('🎉 ¡Objetivo completado!', `Has completado tu sesión de estudio de ${this.label}`);
+        showToast(`🎉 ¡Bloque completado con éxito: ${this.label}!`, 'success');
+    },
+    updateUI() {
+        const m = Math.floor(this.remaining / 60);
+        const s = this.remaining % 60;
+        const str = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+        const disp = document.getElementById('timer-display');
+        if (disp) disp.textContent = str;
+        const lbl = document.getElementById('timer-target-label');
+        if (lbl) lbl.textContent = this.label;
+
+        const circle = document.getElementById('timer-progress-circle');
+        if (circle) {
+            const totalDash = 565.48;
+            const pct = (this.duration - this.remaining) / this.duration;
+            circle.style.strokeDashoffset = totalDash * (1 - pct);
+        }
+    }
+};
+
+// GET ACTIVE OR NEXT SCHEDULE SLOT
+function getActiveOrNextSlot(dateObj) {
+    const dayIdx = dateObj.getDay();
+    const curHour = dateObj.getHours();
+    const curMin = dateObj.getMinutes();
+    const nowMins = curHour * 60 + curMin;
+
+    const dayObj = weeklySchedule.find(d => d.dayIndex === dayIdx);
+    if (!dayObj) return { current: null, next: null, isWeekend: true };
+
+    const allSlots = [...dayObj.morning, ...dayObj.afternoon];
+
+    // Check active
+    let current = allSlots.find(s => {
+        const start = s.startHour * 60 + s.startMin;
+        const end = s.endHour * 60 + s.endMin;
+        return nowMins >= start && nowMins < end;
+    });
+
+    // Check FCT (09:00 - 15:00)
+    if (!current && nowMins >= 9 * 60 && nowMins < 15 * 60) {
+        current = {
+            id: 'fct-today',
+            time: '09:00 - 15:00',
+            startHour: 9, startMin: 0, endHour: 15, endMin: 0,
+            subject: 'Prácticas de Empresa (FCT)',
+            code: 'FCT',
+            type: 'fct',
+            tip: 'Jornada laboral en empresa / seguimiento del tutor'
+        };
+    }
+
+    // Check next slot today
+    let next = allSlots.find(s => (s.startHour * 60 + s.startMin) > nowMins);
+
+    return { current, next, isWeekend: false };
+}
+
+// TRACK FIRED ALERTS TO PREVENT REPETITIVE SPAM
+const firedAlerts = new Set();
+
+// LIVE ENGINE: RUNS EVERY SECOND
+function updateLiveClockAndStatus() {
+    const now = getCurrentDate();
+
+    // Clock
+    const h = String(now.getHours()).padStart(2, '0');
+    const m = String(now.getMinutes()).padStart(2, '0');
+    const s = String(now.getSeconds()).padStart(2, '0');
+    const clockEl = document.getElementById('digital-clock');
+    if (clockEl) clockEl.textContent = `${h}:${m}:${s}`;
+
+    const activeInfo = getActiveOrNextSlot(now);
+    const badgeEl = document.getElementById('live-badge');
+    const badgeText = document.getElementById('live-badge-text');
+    const titleEl = document.getElementById('live-main-title');
+    const subEl = document.getElementById('live-sub-title');
+
+    if (activeInfo.isWeekend) {
+        badgeEl.className = 'live-badge idle';
+        badgeText.textContent = 'FIN DE SEMANA';
+        titleEl.innerHTML = '🏖️ Fin de Semana (Descanso y Repaso Libre)';
+        subEl.innerHTML = 'Próxima sesión oficial: <strong>Lunes 06:00 h - TFC</strong>';
+    } else if (activeInfo.current) {
+        badgeEl.className = 'live-badge active';
+        badgeText.textContent = 'EN DIRECTO';
+        const nowMins = now.getHours() * 60 + now.getMinutes();
+        const endMins = activeInfo.current.endHour * 60 + activeInfo.current.endMin;
+        const leftMins = Math.max(0, endMins - nowMins);
+        const totalDuration = (activeInfo.current.endHour * 60 + activeInfo.current.endMin) - (activeInfo.current.startHour * 60 + activeInfo.current.startMin);
+        const elapsed = totalDuration - leftMins;
+        const pct = Math.round((elapsed / totalDuration) * 100);
+
+        titleEl.innerHTML = `🔴 ${activeInfo.current.subject} <span class="live-countdown">${leftMins} min restantes (${pct}%)</span>`;
+        subEl.innerHTML = `🕒 ${activeInfo.current.time} | ${activeInfo.current.tip}`;
+
+        // Check if start alert should fire
+        const startKey = `${activeInfo.current.id}-start-${now.toDateString()}`;
+        if (!firedAlerts.has(startKey) && elapsed <= 1) {
+            firedAlerts.add(startKey);
+            AudioManager.playChime('start');
+            NotificationManager.send('🔔 ¡Comienza ahora!', `${activeInfo.current.subject} (${activeInfo.current.time})`);
+            showToast(`🔔 ¡Comienza ahora: ${activeInfo.current.subject}!`, 'warning');
+        }
+    } else if (activeInfo.next) {
+        badgeEl.className = 'live-badge idle';
+        badgeText.textContent = 'PRÓXIMA ACTIVIDAD';
+        const nowMins = now.getHours() * 60 + now.getMinutes();
+        const nextStartMins = activeInfo.next.startHour * 60 + activeInfo.next.startMin;
+        const diffMins = nextStartMins - nowMins;
+        const diffH = Math.floor(diffMins / 60);
+        const remM = diffMins % 60;
+        const timeStr = diffH > 0 ? `${diffH}h ${remM}m` : `${remM} min`;
+
+        titleEl.innerHTML = `⏳ Siguiente: ${activeInfo.next.subject} <span class="live-countdown">en ${timeStr}</span>`;
+        subEl.innerHTML = `Horario: ${activeInfo.next.time} | ${activeInfo.next.tip}`;
+
+        // Check 5 min warning alert
+        if (diffMins <= 5 && AppSettings.data.leadAlertEnabled) {
+            const warnKey = `${activeInfo.next.id}-warn-${now.toDateString()}`;
+            if (!firedAlerts.has(warnKey)) {
+                firedAlerts.add(warnKey);
+                AudioManager.playChime('warning');
+                NotificationManager.send('⏳ En 5 minutos', `${activeInfo.next.subject} comenzará a las ${activeInfo.next.time.split(' - ')[0]}`);
+                showToast(`⏳ En ${diffMins} minutos comienza: ${activeInfo.next.subject}`, 'warning');
+            }
+        }
+    } else {
+        badgeEl.className = 'live-badge idle';
+        badgeText.textContent = 'JORNADA CONCLUIDA';
+        titleEl.innerHTML = '🌙 Sesiones de hoy finalizadas';
+        subEl.innerHTML = '¡Gran trabajo hoy! Descansa para el foco matutino de mañana.';
+    }
+
+    // Update time machine if simulated
+    if (simulatedDate) {
+        simulatedDate.setSeconds(simulatedDate.getSeconds() + 1);
+    }
+}
+
+// TOAST NOTIFICATIONS
+function showToast(msg, type = 'info') {
+    const container = document.getElementById('toast-container');
+    if (!container) return;
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    toast.innerHTML = `
+        <div style="font-size: 1.2rem;">${type === 'warning' ? '⚠️' : type === 'success' ? '✅' : '🔔'}</div>
+        <div style="flex:1; font-size: 0.88rem; font-weight: 500;">${msg}</div>
+        <button style="background:transparent; border:none; color:var(--text-muted); cursor:pointer; font-size:1.1rem;" onclick="this.parentElement.remove()">✕</button>
+    `;
+    container.appendChild(toast);
+    setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateX(100%)';
+        toast.style.transition = 'all 0.3s ease';
+        setTimeout(() => toast.remove(), 300);
+    }, 4500);
+}
+
+// MODALS CONTROL
+function openBriefingModal() {
+    const modal = document.getElementById('briefing-modal');
+    populateBriefing();
+    modal.classList.add('active');
+}
+
+function closeBriefingModal() {
+    document.getElementById('briefing-modal').classList.remove('active');
+}
+
+function openSettingsModal() {
+    updateSettingsUI();
+    document.getElementById('settings-modal').classList.add('active');
+}
+
+function closeSettingsModal() {
+    document.getElementById('settings-modal').classList.remove('active');
+}
+
+function openFocusTimerModal() {
+    switchTab('focus', document.querySelectorAll('.tab-btn')[3]);
+    FocusTimer.syncWithCurrentSlot();
+}
+
+function updateSettingsUI() {
+    document.getElementById('set-sound').checked = AppSettings.data.soundEnabled;
+    document.getElementById('set-lead').checked = AppSettings.data.leadAlertEnabled;
+    document.getElementById('set-voice-startup').checked = AppSettings.data.voiceOnStartup;
+    document.getElementById('chk-auto-briefing').checked = AppSettings.data.showBriefingOnStartup;
+}
+
+// POPULATE BRIEFING MODAL
+function populateBriefing() {
+    const now = getCurrentDate();
+    const dayIdx = now.getDay();
+    const days = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+    const months = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+
+    const dayName = days[dayIdx];
+    const dateStr = `${dayName}, ${now.getDate()} de ${months[now.getMonth()]} de ${now.getFullYear()}`;
+    document.getElementById('briefing-badge-day').textContent = dayName.toUpperCase();
+    document.getElementById('briefing-date-str').textContent = dateStr;
+
+    // Greeting
+    const hour = now.getHours();
+    let greet = '¡Buenas noches, José Carlos! 🌙';
+    if (hour >= 6 && hour < 13) greet = '¡Buenos días, José Carlos! 🌅';
+    else if (hour >= 13 && hour < 20) greet = '¡Buenas tardes, José Carlos! ☀️';
+    document.getElementById('briefing-greeting').textContent = greet;
+
+    // TFC Countdown
+    const tfcDate = new Date('2026-11-30T23:59:59');
+    const diffDays = Math.ceil((tfcDate - now) / (1000 * 60 * 60 * 24));
+    document.getElementById('briefing-tfc-days').textContent = diffDays > 0 ? `Faltan ${diffDays} días` : '¡Plazo concluido!';
+
+    // Day Schedule
+    const todayObj = weeklySchedule.find(d => d.dayIndex === dayIdx);
+    const morningEl = document.getElementById('briefing-morning-content');
+    const aftEl = document.getElementById('briefing-afternoon-content');
+    const summaryTitle = document.getElementById('briefing-today-summary');
+    const summaryDetail = document.getElementById('briefing-today-detail');
+
+    if (todayObj) {
+        summaryTitle.textContent = todayObj.morning.map(m => m.subject).join(' + ');
+        summaryDetail.textContent = `Mañana: ${todayObj.morning.map(m => m.time + ' (' + m.subject.split('(')[0].trim() + ')').join(' | ')}`;
+
+        morningEl.innerHTML = todayObj.morning.map(m => `
+            <div style="margin-bottom:0.4rem;">
+                <span style="color:var(--accent); font-size:0.78rem;">${m.time}</span>: 
+                <strong>${m.subject}</strong>
+                <div style="font-size:0.75rem; color:var(--text-muted);">${m.tip}</div>
+            </div>
+        `).join('');
+
+        if (todayObj.afternoon.length > 0) {
+            aftEl.innerHTML = todayObj.afternoon.map(a => `
+                <div style="margin-bottom:0.35rem;">
+                    <span style="color:var(--purple); font-size:0.78rem;">${a.time}</span>: 
+                    <strong>${a.subject}</strong>
+                </div>
+            `).join('');
+        } else {
+            aftEl.innerHTML = '<span style="color:var(--text-muted);">Sin clases presenciales esta tarde</span>';
+        }
+    } else {
+        summaryTitle.textContent = 'Fin de Semana: Repaso Libre y Descanso';
+        summaryDetail.textContent = 'Aprovecha para descansar la vista y avanzar con el anteproyecto TFC a tu ritmo.';
+        morningEl.innerHTML = '<span style="color:var(--text-muted);">Sin horario matutino obligatorio</span>';
+        aftEl.innerHTML = '<span style="color:var(--text-muted);">Sin clases presenciales</span>';
+    }
+}
+
+
+function openCloudModal() {
+    const modal = document.getElementById('cloud-modal');
+    if (modal) modal.style.display = 'flex';
+}
+function closeCloudModal() {
+    const modal = document.getElementById('cloud-modal');
+    if (modal) modal.style.display = 'none';
+}
+
+// DATA MANAGEMENT
+function loadData() {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+        try {
+            courseData = JSON.parse(saved);
+        } catch (e) {
+            courseData = JSON.parse(JSON.stringify(initialCourseData));
+        }
+    } else {
+        courseData = JSON.parse(JSON.stringify(initialCourseData));
+    }
+}
+
+function saveData() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(courseData));
+    updateStats();
+    if (window.FirebaseSync && typeof window.FirebaseSync.triggerSave === 'function') {
+        window.FirebaseSync.triggerSave();
+    }
+}
+
+function toggleTask(subjectId, taskId) {
+    const subj = courseData.find(s => s.id === subjectId);
+    if (!subj) return;
+    const task = subj.tasks.find(t => t.id === taskId);
+    if (!task) return;
+    task.done = !task.done;
+    if (task.done) {
+        AudioManager.playChime('finish');
+        showToast(`✅ ¡Tarea completada: ${task.title}!`, 'success');
+    }
+    saveData();
+    renderSubjects();
+    renderTimeline();
+}
+
+// STATS
+function updateStats() {
+    let total = 0;
+    let done = 0;
+    let worksTotal = 0;
+    let worksDone = 0;
+    let testsTotal = 0;
+    let testsDone = 0;
+
+    courseData.forEach(s => {
+        s.tasks.forEach(t => {
+            total++;
+            if (t.done) done++;
+
+            if (t.type === 'work' || t.type === 'tfc') {
+                worksTotal++;
+                if (t.done) worksDone++;
+            } else if (t.type === 'test') {
+                testsTotal++;
+                if (t.done) testsDone++;
+            }
+        });
+    });
+
+    const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+    document.getElementById('global-bar').style.width = `${pct}%`;
+    document.getElementById('global-pct-text').textContent = `${pct}% (${done}/${total})`;
+    document.getElementById('works-counter').textContent = `${worksDone} / ${worksTotal}`;
+    document.getElementById('tests-counter').textContent = `${testsDone} / ${testsTotal}`;
+
+    // TFC Countdown
+    const now = getCurrentDate();
+    const tfcDate = new Date('2026-11-30T23:59:59');
+    const diffDays = Math.ceil((tfcDate - now) / (1000 * 60 * 60 * 24));
+    const tfcEl = document.getElementById('tfc-countdown');
+    const tfcDone = courseData.find(s => s.id === 'tfc')?.tasks.find(t => t.id === 'tfc-5')?.done;
+
+    if (tfcDone) {
+        tfcEl.textContent = '¡Entregado! ✅';
+        tfcEl.style.color = 'var(--success)';
+    } else if (diffDays >= 0) {
+        tfcEl.textContent = `Faltan ${diffDays} días`;
+        tfcEl.style.color = 'var(--text-main)';
+    } else {
+        tfcEl.textContent = 'Plazo finalizado';
+    }
+
+    // Focus de hoy
+    const dayIdx = now.getDay();
+    const todayObj = weeklySchedule.find(d => d.dayIndex === dayIdx);
+    const focusEl = document.getElementById('today-focus');
+    const aftEl = document.getElementById('today-Afternoon');
+
+    if (todayObj) {
+        focusEl.textContent = todayObj.morning.map(m => m.subject.split('(')[0].trim()).join(' + ');
+        aftEl.textContent = `Tarde: ${todayObj.afternoon.map(a => a.subject.split('(')[0].trim()).join(', ') || 'Sin clases'}`;
+    } else {
+        focusEl.textContent = 'Fin de Semana (Descanso)';
+        aftEl.textContent = 'Sin clases presenciales hoy';
+    }
+}
+
+// RENDER SUBJECTS
+function renderSubjects() {
+    const container = document.getElementById('subjects-container');
+    const search = document.getElementById('search-input').value.toLowerCase();
+    const statusFilter = document.getElementById('filter-status').value;
+    const typeFilter = document.getElementById('filter-type').value;
+
+    container.innerHTML = '';
+
+    courseData.forEach(subj => {
+        const filteredTasks = subj.tasks.filter(t => {
+            const matchSearch = t.title.toLowerCase().includes(search) || subj.name.toLowerCase().includes(search);
+            const matchStatus = statusFilter === 'all' || (statusFilter === 'done' && t.done) || (statusFilter === 'pending' && !t.done);
+            const matchType = typeFilter === 'all' || (typeFilter === 'test' && t.type === 'test') || (typeFilter === 'work' && (t.type === 'work' || t.type === 'tfc'));
+            return matchSearch && matchStatus && matchType;
+        });
+
+        if (filteredTasks.length === 0) return;
+
+        const subjTotal = subj.tasks.length;
+        const subjDone = subj.tasks.filter(t => t.done).length;
+        const subjPct = Math.round((subjDone / subjTotal) * 100);
+
+        const card = document.createElement('div');
+        card.className = 'subject-card';
+
+        let tasksHtml = filteredTasks.map(t => {
+            let badgeType = '';
+            if (t.type === 'test') badgeType = '<span class="badge badge-test">Test</span>';
+            else if (t.type === 'work') badgeType = '<span class="badge badge-work">Trabajo Evaluable</span>';
+            else if (t.type === 'tfc') badgeType = '<span class="badge badge-tfc">Hito TFC</span>';
+
+            let planBadge = t.plan ? `<span class="badge badge-plan">🎯 Plan: ${t.plan}</span>` : '';
+
+            return `
+                <li class="task-item ${t.done ? 'done' : ''}" onclick="toggleTask('${subj.id}', '${t.id}')">
+                    <input type="checkbox" class="task-checkbox" ${t.done ? 'checked' : ''} onclick="event.stopPropagation(); toggleTask('${subj.id}', '${t.id}')">
+                    <div class="task-info">
+                        <span class="task-title">${t.title}</span>
+                        <div class="task-meta">
+                            ${badgeType}
+                            ${planBadge}
+                            <span class="badge-date">📅 Límite: ${t.deadline}</span>
+                        </div>
+                    </div>
+                </li>
+            `;
+        }).join('');
+
+        card.innerHTML = `
+            <div class="subject-header">
+                <div class="subject-title-row">
+                    <span class="subject-code">${subj.code}</span>
+                    <span class="subject-name">${subj.name}</span>
+                    <span class="subject-pct">${subjPct}% (${subjDone}/${subjTotal})</span>
+                </div>
+                <div style="font-size: 0.76rem; color: var(--text-muted); margin-bottom: 0.5rem;">🕒 ${subj.schedule}</div>
+                <div class="mini-progress">
+                    <div class="mini-progress-fill" style="width: ${subjPct}%"></div>
+                </div>
+            </div>
+            <ul class="task-list">${tasksHtml}</ul>
+        `;
+        container.appendChild(card);
+    });
+}
+
+// RENDER TIMELINE
+function renderTimeline() {
+    const tbody = document.getElementById('timeline-body');
+    tbody.innerHTML = '';
+
+    courseData.forEach(subj => {
+        subj.tasks.filter(t => t.type === 'work' || t.type === 'tfc').forEach(t => {
+            const tr = document.createElement('tr');
+            tr.style.opacity = t.done ? '0.5' : '1';
+            tr.innerHTML = `
+                <td>
+                    <input type="checkbox" class="task-checkbox" ${t.done ? 'checked' : ''} onchange="toggleTask('${subj.id}', '${t.id}')">
+                </td>
+                <td><strong>${subj.name}</strong></td>
+                <td style="${t.done ? 'text-decoration:line-through' : ''}">${t.title}</td>
+                <td><span class="badge badge-plan">${t.plan || '-'}</span></td>
+                <td>${t.deadline}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+    });
+}
+
+// RENDER SCHEDULE
+function renderSchedule() {
+    const container = document.getElementById('schedule-container');
+    const now = getCurrentDate();
+    const todayIdx = now.getDay();
+    const activeInfo = getActiveOrNextSlot(now);
+
+    container.innerHTML = weeklySchedule.map(d => {
+        const isToday = d.dayIndex === todayIdx;
+        return `
+            <div class="day-column ${isToday ? 'today' : ''}">
+                <div class="day-header">
+                    <span>${d.day}</span>
+                    ${isToday ? '<span class="badge badge-test">HOY</span>' : ''}
+                </div>
+                ${d.morning.map(m => {
+                    const isActive = isToday && activeInfo.current && activeInfo.current.id === m.id;
+                    return `
+                        <div class="slot ${isActive ? 'active-now' : ''}">
+                            <span class="slot-time">
+                                <span>🌅 ${m.time}</span>
+                                ${isActive ? '<span style="color:#ef4444; font-weight:800;">🔴 EN DIRECTO</span>' : ''}
+                            </span>
+                            <div class="slot-name">${m.subject}</div>
+                            <div class="slot-tip">${m.tip}</div>
+                        </div>
+                    `;
+                }).join('')}
+
+                <div class="slot fct ${isToday && activeInfo.current && activeInfo.current.id === 'fct-today' ? 'active-now' : ''}">
+                    <span class="slot-time">💼 09:00 - 15:00</span>
+                    <div class="slot-name">${d.fct.text}</div>
+                    <div class="slot-tip">Puntualidad y seguimiento</div>
+                </div>
+
+                ${d.afternoon.map(a => {
+                    const isActive = isToday && activeInfo.current && activeInfo.current.id === a.id;
+                    return `
+                        <div class="slot afternoon ${isActive ? 'active-now' : ''}">
+                            <span class="slot-time">
+                                <span>🏫 ${a.time}</span>
+                                ${isActive ? '<span style="color:#ef4444; font-weight:800;">🔴 EN DIRECTO</span>' : ''}
+                            </span>
+                            <div class="slot-name">${a.subject}</div>
+                            <div class="slot-tip">${a.tip}</div>
+                        </div>
+                    `;
+                }).join('')}
+            </div>
+        `;
+    }).join('');
+}
+
+// TAB SWITCHER
+function switchTab(tabName, btn) {
+    document.querySelectorAll('.view-section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById(`view-${tabName}`).classList.add('active');
+    btn.classList.add('active');
+    document.getElementById('task-filters').style.display = tabName === 'asignaturas' ? 'flex' : 'none';
+}
+
+// EXPORT / IMPORT
+function exportProgress() {
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(courseData, null, 2));
+    const dlAnchor = document.createElement('a');
+    dlAnchor.setAttribute("href", dataStr);
+    dlAnchor.setAttribute("download", `progreso_2daw_${new Date().toISOString().slice(0,10)}.json`);
+    document.body.appendChild(dlAnchor);
+    dlAnchor.click();
+    dlAnchor.remove();
+    showToast('💾 Copia de seguridad exportada con éxito', 'success');
+}
+
+function importProgress(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const imported = JSON.parse(e.target.result);
+            if (Array.isArray(imported)) {
+                courseData = imported;
+                saveData();
+                renderSubjects();
+                renderTimeline();
+                showToast('✅ Progreso importado correctamente', 'success');
+            }
+        } catch (err) {
+            showToast('El archivo JSON no es válido', 'warning');
+        }
+    };
+    reader.readAsText(file);
+}
+
+function resetProgress() {
+    if (confirm('¿Seguro que quieres restaurar el progreso al estado inicial del plan oficial?')) {
+        localStorage.removeItem(STORAGE_KEY);
+        loadData();
+        saveData();
+        renderSubjects();
+        renderTimeline();
+        showToast('↺ Progreso restaurado a valores iniciales', 'info');
+    }
+}
+
+// INITIALIZATION
+AppSettings.load();
+loadData();
+updateStats();
+renderSubjects();
+renderTimeline();
+renderSchedule();
+FocusTimer.updateUI();
+
+// LIVE TIMER LOOP
+setInterval(updateLiveClockAndStatus, 1000);
+updateLiveClockAndStatus();
+
+// AUTO OPEN BRIEFING ON STARTUP IF ENABLED
+window.addEventListener('DOMContentLoaded', () => {
+    setTimeout(() => {
+        if (AppSettings.data.showBriefingOnStartup) {
+            openBriefingModal();
+            if (AppSettings.data.voiceOnStartup) {
+                VoiceManager.speakBriefing();
+            }
+        }
+    }, 400);
+});
+</script>
+
+<!-- FIREBASE SYNC MODULE -->
+<script type="module">
+import { auth, db } from "./js/firebase-config.js";
+import { 
+    createUserWithEmailAndPassword, 
+    signInWithEmailAndPassword, 
+    signOut, 
+    onAuthStateChanged 
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { 
+    doc, 
+    setDoc, 
+    getDoc, 
+    serverTimestamp 
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+let currentUser = null;
+let saveDebounceTimer = null;
+
+const COLLECTION_NAME = "sesiones_estudio";
+
+function updateCloudUI(user) {
+    const guestView = document.getElementById('cloud-guest-view');
+    const userView = document.getElementById('cloud-user-view');
+    const userDisplay = document.getElementById('cloud-user-display');
+    const badgeDot = document.getElementById('cloud-badge-dot');
+    const btnText = document.getElementById('cloud-btn-text');
+
+    if (user) {
+        if (guestView) guestView.style.display = 'none';
+        if (userView) userView.style.display = 'block';
+        if (userDisplay) userDisplay.textContent = user.email;
+        if (badgeDot) {
+            badgeDot.style.background = 'var(--success)';
+            badgeDot.style.boxShadow = '0 0 8px var(--success)';
+        }
+        if (btnText) btnText.textContent = user.email.split('@')[0];
+    } else {
+        if (guestView) guestView.style.display = 'block';
+        if (userView) userView.style.display = 'none';
+        if (badgeDot) {
+            badgeDot.style.background = '#94a3b8';
+            badgeDot.style.boxShadow = 'none';
+        }
+        if (btnText) btnText.textContent = '☁️ Sesión Nube';
+    }
+}
+
+async function loadCloudData(user) {
+    if (!user) return;
+    try {
+        const docRef = doc(db, COLLECTION_NAME, user.uid);
+        const snap = await getDoc(docRef);
+        if (snap.exists()) {
+            const data = snap.data();
+            let updated = false;
+
+            if (data.courseData && Array.isArray(data.courseData)) {
+                window.courseData = data.courseData;
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(window.courseData));
+                updated = true;
+            }
+            if (data.settings && typeof data.settings === 'object') {
+                Object.assign(AppSettings.data, data.settings);
+                localStorage.setItem(SETTINGS_KEY, JSON.stringify(AppSettings.data));
+                updated = true;
+            }
+
+            if (updated) {
+                updateStats();
+                renderSubjects();
+                renderTimeline();
+                renderSchedule();
+                if (typeof updateSettingsUI === 'function') updateSettingsUI();
+                showToast("☁️ Sesión y progreso sincronizados desde Firebase", "success");
+            }
+            
+            const lastSyncEl = document.getElementById('cloud-last-sync');
+            if (lastSyncEl && data.ultimaSincronizacion) {
+                const date = data.ultimaSincronizacion.toDate ? data.ultimaSincronizacion.toDate() : new Date();
+                lastSyncEl.textContent = 'Última sincro: ' + date.toLocaleTimeString();
+            }
+        } else {
+            // First time: upload local progress to cloud
+            await syncToCloud();
+            showToast("☁️ Progreso inicial guardado en tu nube Firebase", "success");
+        }
+    } catch (err) {
+        console.error("Error loading cloud data:", err);
+        showToast("Aviso: no se pudo sincronizar la nube (" + err.message + ")", "warning");
+    }
+}
+
+async function syncToCloud() {
+    if (!currentUser) return;
+    try {
+        const docRef = doc(db, COLLECTION_NAME, currentUser.uid);
+        await setDoc(docRef, {
+            email: currentUser.email,
+            courseData: window.courseData,
+            settings: AppSettings.data,
+            ultimaSincronizacion: serverTimestamp()
+        }, { merge: true });
+
+        const lastSyncEl = document.getElementById('cloud-last-sync');
+        if (lastSyncEl) {
+            lastSyncEl.textContent = 'Última sincro: ' + new Date().toLocaleTimeString();
+        }
+    } catch (err) {
+        console.error("Error saving to cloud:", err);
+    }
+}
+
+window.FirebaseSync = {
+    get currentUser() { return currentUser; },
+
+    triggerSave() {
+        if (!currentUser) return;
+        clearTimeout(saveDebounceTimer);
+        saveDebounceTimer = setTimeout(() => {
+            syncToCloud();
+        }, 1200);
+    },
+
+    async login() {
+        const email = document.getElementById('cloud-email').value.trim();
+        const pass = document.getElementById('cloud-password').value;
+        const errEl = document.getElementById('cloud-error-msg');
+        if (!email || !pass) {
+            errEl.textContent = "Por favor indica correo y contraseña";
+            return;
+        }
+        errEl.textContent = "Iniciando sesión...";
+        try {
+            await signInWithEmailAndPassword(auth, email, pass);
+            errEl.textContent = "";
+            showToast("✅ ¡Sesión iniciada con éxito!", "success");
+            closeCloudModal();
+        } catch (err) {
+            errEl.textContent = "Error: " + err.message;
+        }
+    },
+
+    async register() {
+        const email = document.getElementById('cloud-email').value.trim();
+        const pass = document.getElementById('cloud-password').value;
+        const errEl = document.getElementById('cloud-error-msg');
+        if (!email || !pass) {
+            errEl.textContent = "Por favor indica correo y contraseña";
+            return;
+        }
+        if (pass.length < 6) {
+            errEl.textContent = "La contraseña debe tener al menos 6 caracteres";
+            return;
+        }
+        errEl.textContent = "Creando cuenta en Firebase...";
+        try {
+            await createUserWithEmailAndPassword(auth, email, pass);
+            errEl.textContent = "";
+            showToast("🎉 ¡Cuenta creada y sincronizada!", "success");
+            closeCloudModal();
+        } catch (err) {
+            errEl.textContent = "Error: " + err.message;
+        }
+    },
+
+    async logout() {
+        try {
+            await signOut(auth);
+            showToast("Sesión de la nube cerrada", "info");
+        } catch (err) {
+            console.error(err);
+        }
+    },
+
+    async forcePush() {
+        if (!currentUser) return;
+        showToast("Subiendo progreso a Firebase...", "info");
+        await syncToCloud();
+        showToast("✅ Progreso actualizado en la nube", "success");
+    },
+
+    async forcePull() {
+        if (!currentUser) return;
+        showToast("Descargando progreso de Firebase...", "info");
+        await loadCloudData(currentUser);
+    }
+};
+
+// Monitor Auth State
+onAuthStateChanged(auth, async (user) => {
+    currentUser = user;
+    updateCloudUI(user);
+    if (user) {
+        await loadCloudData(user);
+    }
+});
+</script>
+
+</body>
+</html>
