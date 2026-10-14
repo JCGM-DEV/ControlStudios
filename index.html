@@ -1071,7 +1071,7 @@
         </div>
 
         <div class="filters" id="task-filters">
-            <input type="search" id="search-input" placeholder="Buscar asignatura, unidad o hito..." oninput="renderSubjects()">
+            <input type="search" id="search-input" placeholder="Buscar asignatura, unidad o hito..." autocomplete="off" spellcheck="false" oninput="renderSubjects()">
             <select id="filter-status" onchange="renderSubjects()">
                 <option value="all">Todos los estados</option>
                 <option value="pending">⏳ Solo Pendientes</option>
@@ -1578,14 +1578,13 @@ const AppSettings = {
             if (s) this.data = Object.assign(this.data, JSON.parse(s));
         } catch(e) {}
     },
-        save() {
+    save() {
         try {
             localStorage.setItem(SETTINGS_KEY, JSON.stringify(this.data));
             if (window.FirebaseSync && typeof window.FirebaseSync.triggerSave === 'function') {
                 window.FirebaseSync.triggerSave();
             }
         } catch(e) {}
-    }, catch(e) {}
     },
     set(key, val) {
         this.data[key] = val;
@@ -2513,7 +2512,7 @@ async function loadCloudData(user) {
                 lastSyncEl.textContent = 'Última sincro: ' + date.toLocaleTimeString();
             }
         } else {
-            // First time: upload local progress to cloud
+            // Primer login del usuario: guardar progreso actual en su cuenta
             await syncToCloud();
             showToast("☁️ Progreso inicial guardado en tu nube Firebase", "success");
         }
